@@ -104,4 +104,6 @@ python3 scripts/build_skills.py
 
 ## ライセンス
 
-変換元のライセンスを各 Skill の `LICENSE` に同梱しています。著作権表示は Skill ごとに異なるため、再配布時は各ディレクトリの `LICENSE` を保持してください。
+このリポジトリで独自に作成したインストーラ、変換スクリプト、ドキュメントには[MIT License](LICENSE)を適用します。
+
+変換済みSkillsは、変換元のMITライセンスを引き継ぎます。該当するライセンスは各Skillの `LICENSE` に同梱され、著作権表示はCursor、Lauren Tan、またはAnysphere, Inc.に帰属します。ルートのライセンスはこれらの表示を置き換えません。変換物を再配布するときは、対応する各Skillの `LICENSE` を保持してください。

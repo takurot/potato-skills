@@ -104,4 +104,6 @@ The `ref/` directory is not included in this repository. If `ref/plugins` alread
 
 ## License
 
-The source license for each converted Skill is bundled in that Skill's `LICENSE` file. Copyright notices differ between Skills; keep each corresponding `LICENSE` file when redistributing them.
+The repository-authored installer, converter, and documentation are available under the [MIT License](LICENSE).
+
+Converted Skills retain their upstream MIT licenses. The applicable source license is bundled in each Skill's `LICENSE` file, with copyright notices belonging to Cursor, Lauren Tan, or Anysphere, Inc. The root license does not replace those notices. Keep each corresponding Skill `LICENSE` file when redistributing converted content.

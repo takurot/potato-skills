@@ -1,103 +1,107 @@
 # potato-skills
 
-Cursor 公式プラグイン集 [`cursor/plugins`](https://github.com/cursor/plugins) の Skills を、Claude Code と Codex で読み込める形式に変換した配布リポジトリです。
+[日本語](README_JP.md)
 
-## 内容
+**Last updated:** 2026-09-26
 
-- `skills/claude-code/skills/` — Claude Code 用 Skills（親ディレクトリは検証可能な Claude Code plugin）
-- `skills/codex/` — Codex 用 Skills（`agents/openai.yaml` を含む）
-- `install.sh` — ユーザー単位またはプロジェクト単位のインストーラ
-- `scripts/build_skills.py` — `ref/plugins` から配布物を再生成する変換スクリプト
-- `skills/manifest.json` — 変換元、バージョン、互換性上の注意を記録したマニフェスト
+A distribution of Skills from the official [`cursor/plugins`](https://github.com/cursor/plugins) collection, converted into formats that Claude Code and Codex can load.
 
-変換対象は各 Cursor プラグインの `plugin.json` が `skills` として宣言したものだけです。MCP 設定しか持たないプラグインは Skills ではないため変換しません。重複する2組は、付属ファイルが充実した版または本来のプラグイン側の版に統合しています。
-現在の参照 revision からは、各ホスト向けに91個の Skills を生成します。
+## Contents
 
-## インストール
+- `skills/claude-code/skills/` — Skills for Claude Code; its parent directory is also a validatable Claude Code plugin
+- `skills/codex/` — Skills for Codex, including `agents/openai.yaml`
+- `install.sh` — Installer for user-level or project-level installation
+- `scripts/build_skills.py` — Conversion script that regenerates the distributions from `ref/plugins`
+- `skills/manifest.json` — Manifest recording source paths, versions, and compatibility notes
 
-リポジトリを取得します。
+Only Skills declared by each Cursor plugin's `plugin.json` are converted. Plugins that contain only MCP configuration are not converted because they are not Skills. Two duplicate Skill pairs are consolidated by selecting either the more self-contained copy or the copy from the canonical plugin. The current source revision generates 91 Skills for each host.
+
+## Installation
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/takurot/potato-skills.git
 cd potato-skills
 ```
 
-両方へユーザー単位でインストールします。
+Install all Skills for both hosts at the user level:
 
 ```bash
 ./install.sh
 ```
 
-片方だけにインストールする場合:
+Install for only one host:
 
 ```bash
 ./install.sh --target claude
 ./install.sh --target codex
 ```
 
-プロジェクト単位でインストールする場合:
+Install into a project:
 
 ```bash
 ./install.sh --target both --scope project --project-dir /path/to/project
 ```
 
-Claude Code は `<project>/.claude/skills/`、Codex は `<project>/.agents/skills/` に配置されます。
+Claude Code Skills are installed in `<project>/.claude/skills/`. Codex Skills are installed in `<project>/.agents/skills/`.
 
-特定の Skill だけを選ぶこともできます。
+You can also select individual Skills:
 
 ```bash
 ./install.sh --list
 ./install.sh --target codex --skill thermos --skill tdd
 ```
 
-主なオプション:
+Main options:
 
-- `--dry-run` — 書き込まずに予定を表示
-- `--force` — 既存 Skill をタイムスタンプ付きバックアップへ移してから更新
-- `--scope user|project` — インストール範囲を選択
-- `--target claude|codex|both` — 対象を選択
+- `--dry-run` — Show planned operations without writing files
+- `--force` — Move conflicting Skills to timestamped backups before updating
+- `--scope user|project` — Select the installation scope
+- `--target claude|codex|both` — Select the target host
 
-既存の同名 Skill は標準では上書きせず、`skipped` と表示します。同一内容なら `unchanged` です。
-Codexのユーザー単位バックアップは `~/.codex/skill-backups/`、プロジェクト単位バックアップは `<project>/.agents/skill-backups/` に保存し、Skill探索対象から分離します。
+By default, an existing Skill with the same name is not overwritten and is reported as `skipped`. Identical installations are reported as `unchanged`.
 
-## 変換方針
+User-level Codex backups are stored in `~/.codex/skill-backups/`. Project-level Codex backups are stored in `<project>/.agents/skill-backups/`. Both locations are outside Skill discovery directories.
 
-Claude Code と Codex は Skill frontmatter の仕様が異なるため、配布物を分けています。
+## Conversion policy
 
-| Cursor の要素 | Claude Code | Codex |
+Claude Code and Codex use different Skill frontmatter formats, so this repository provides separate distributions.
+
+| Cursor element | Claude Code | Codex |
 |---|---|---|
-| `name`, `description` | 対応形式へ正規化 | 対応形式へ正規化 |
-| `disable-model-invocation` | そのまま保持 | `agents/openai.yaml` の `allow_implicit_invocation: false` に変換 |
-| `icon`, `color`, `mode`, `reminder`, `paths` | 未対応項目を除去 | 未対応項目を除去 |
-| Skill 内の scripts/references/assets | 保持 | 保持 |
-| Cursor の専用 agent 定義 | `references/cursor-agents/` に同梱 | `references/cursor-agents/` に同梱 |
-| `.cursor/skills/` への参照 | `.claude/skills/` へ変換 | `.agents/skills/` または `~/.codex/skills/` へ変換 |
+| `name`, `description` | Normalized to the supported format | Normalized to the supported format |
+| `disable-model-invocation` | Preserved | Converted to `allow_implicit_invocation: false` in `agents/openai.yaml` |
+| `icon`, `color`, `mode`, `reminder`, `paths` | Unsupported fields removed | Unsupported fields removed |
+| Skill scripts, references, and assets | Preserved | Preserved |
+| Cursor-specific agent definitions | Bundled under `references/cursor-agents/` | Bundled under `references/cursor-agents/` |
+| References to `.cursor/skills/` | Converted to `.claude/skills/` | Converted to `.agents/skills/` or `~/.codex/skills/` |
 
-名前は小文字 kebab-case に正規化し、壊れた YAML frontmatter も有効な YAML として再出力します。
+Names are normalized to lowercase kebab-case. Invalid YAML frontmatter from the source is rewritten as valid YAML.
 
-## 互換性の境界
+## Compatibility boundaries
 
-Skill の文章やローカルスクリプトは移植できますが、Cursor 固有のランタイムそのものは同梱していません。
+Skill instructions and local resources can be converted, but Cursor-specific runtime capabilities are not bundled.
 
-- Cursor hooks に依存する自動反復や終了割り込みは、Claude Code/Codex では自動実行されません。
-- Cursor Canvas は、利用できない場合に通常の HTML 成果物へフォールバックする注記を追加しています。
-- MCP を使う Skills は、対応する MCP サーバーを Claude Code/Codex 側で別途設定する必要があります。
-- Cursor SDK や Cursor Cloud Agents を操作する Skill は、引き続き Cursor の認証情報とサービスを必要とします。
-- 固有名の subagent は自動登録しません。元の agent 定義を `references/cursor-agents/` に同梱しているので、利用可能な汎用 subagent へのプロンプトとして使います。
+- Automated repetition and stop interception that depend on Cursor hooks do not run automatically in Claude Code or Codex.
+- Skills that use Cursor Canvas include a fallback to a standalone HTML artifact when Canvas is unavailable.
+- Skills that use MCP require the corresponding MCP server to be configured separately in Claude Code or Codex.
+- Skills that operate the Cursor SDK or Cursor Cloud Agents still require Cursor credentials and services.
+- Named Cursor subagents are not registered automatically. Their original definitions are bundled under `references/cursor-agents/` for use as prompts with an available general-purpose subagent.
 
-各 Skill の先頭にも、利用ホストで存在しない機能を実行済みと扱わないための互換性注記があります。個別の制約は `skills/manifest.json` で確認できます。
+Each converted Skill also starts with a compatibility note that prevents unavailable host capabilities from being reported as executed. See `skills/manifest.json` for per-Skill constraints.
 
-## 再生成
+## Regeneration
 
-`ref/plugins` を更新した後、次を実行します。
+Fetch or update the source plugins, then run the builder:
 
 ```bash
 git clone https://github.com/cursor/plugins.git ref/plugins
 python3 scripts/build_skills.py
 ```
 
-`ref/` はこのリポジトリには含めません。すでに `ref/plugins` がある場合は、そのリポジトリを更新してから変換してください。変換スクリプトは `plugin.json` の `skills` 宣言だけを探索し、`skills/` を決定的に再生成します。
+The `ref/` directory is not included in this repository. If `ref/plugins` already exists, update that repository before converting. The builder discovers only the `skills` directories declared by `plugin.json` and deterministically regenerates `skills/`.
 
-## ライセンス
+## License
 
-変換元のライセンスを各 Skill の `LICENSE` に同梱しています。著作権表示は Skill ごとに異なるため、再配布時は各ディレクトリの `LICENSE` を保持してください。
+The source license for each converted Skill is bundled in that Skill's `LICENSE` file. Copyright notices differ between Skills; keep each corresponding `LICENSE` file when redistributing them.

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Automate Me"
+  short_description: "Use for \"automate me\", \"create/update/refresh my -mode..."
+policy:
+  allow_implicit_invocation: false

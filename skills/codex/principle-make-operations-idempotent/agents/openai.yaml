@@ -1,0 +1,5 @@
+interface:
+  display_name: "Principle Make Operations Idempotent"
+  short_description: "Apply when designing commands, lifecycle steps, or..."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Cancel Ralph"
+  short_description: "Cancel an active Ralph Loop. Use when the user wants to..."

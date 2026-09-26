@@ -1,0 +1,3 @@
+interface:
+  display_name: "Fix Ci"
+  short_description: "Find failing PR checks, inspect logs or external check..."

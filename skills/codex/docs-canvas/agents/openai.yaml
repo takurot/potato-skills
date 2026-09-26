@@ -1,0 +1,3 @@
+interface:
+  display_name: "Docs Canvas"
+  short_description: "Render a documentation-style Cursor Canvas that organizes..."

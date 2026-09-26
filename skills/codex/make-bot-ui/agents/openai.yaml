@@ -1,0 +1,5 @@
+interface:
+  display_name: "Make Bot Ui"
+  short_description: "Use when building a custom UI (page, dashboard, buttons)..."
+policy:
+  allow_implicit_invocation: false

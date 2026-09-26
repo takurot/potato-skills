@@ -1,0 +1,782 @@
+{
+  "schema_version": 1,
+  "generator": "scripts/build_skills.py",
+  "source": "https://github.com/cursor/plugins",
+  "source_revision": "ecc249f1e306fc64ddf83c7bed16cacf7c2239db",
+  "skill_count": 91,
+  "skills": [
+    {
+      "name": "add-dictation",
+      "plugin": "grok-voice",
+      "plugin_version": "0.1.0",
+      "source": "grok-voice/skills/add-dictation/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "add-read-aloud",
+      "plugin": "grok-voice",
+      "plugin_version": "0.1.0",
+      "source": "grok-voice/skills/add-read-aloud/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "add-voice",
+      "plugin": "grok-voice",
+      "plugin_version": "0.1.0",
+      "source": "grok-voice/skills/add-voice/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "advisor",
+      "plugin": "advisor",
+      "plugin_version": "1.0.0",
+      "source": "advisor/skills/advisor/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable.",
+        "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
+      ]
+    },
+    {
+      "name": "architect",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/architect/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "arena",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/arena/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "automate-me",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/automate-me/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
+      ]
+    },
+    {
+      "name": "blast-radius",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/blast-radius/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "bro",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/bro/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "cancel-ralph",
+      "plugin": "ralph-loop",
+      "plugin_version": "1.0.0",
+      "source": "ralph-loop/skills/cancel-ralph/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable."
+      ]
+    },
+    {
+      "name": "check-agent-compatibility",
+      "plugin": "agent-compatibility",
+      "plugin_version": "1.0.0",
+      "source": "agent-compatibility/skills/check-agent-compatibility/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
+      ]
+    },
+    {
+      "name": "check-compiler-errors",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/check-compiler-errors/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "cli-for-agents",
+      "plugin": "cli-for-agent",
+      "plugin_version": "1.0.0",
+      "source": "cli-for-agent/skills/cli-for-agents/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "continual-learning",
+      "plugin": "continual-learning",
+      "plugin_version": "1.0.0",
+      "source": "continual-learning/skills/continual-learning/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable.",
+        "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
+      ]
+    },
+    {
+      "name": "control-cli",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/control-cli/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "control-ui",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/control-ui/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "create-learning-path",
+      "plugin": "teaching",
+      "plugin_version": "1.0.0",
+      "source": "teaching/skills/create-learning-path/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "create-plugin-scaffold",
+      "plugin": "create-plugin",
+      "plugin_version": "1.0.0",
+      "source": "create-plugin/skills/create-plugin-scaffold/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "create-verification-skill",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/create-verification-skill/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "cursor-sdk",
+      "plugin": "cursor-sdk",
+      "plugin_version": "1.0.0",
+      "source": "cursor-sdk/skills/cursor-sdk/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "When Cursor Canvas is unavailable, create a standalone HTML artifact with ordinary web technologies.",
+        "Cursor SDK operations still require Cursor credentials and services; the host agent does not replace them."
+      ]
+    },
+    {
+      "name": "debug-voice",
+      "plugin": "grok-voice",
+      "plugin_version": "0.1.0",
+      "source": "grok-voice/skills/debug-voice/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "deslop",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/deslop/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "docs-canvas",
+      "plugin": "docs-canvas",
+      "plugin_version": "0.1.0",
+      "source": "docs-canvas/skills/docs-canvas/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "When Cursor Canvas is unavailable, create a standalone HTML artifact with ordinary web technologies."
+      ]
+    },
+    {
+      "name": "figure-it-out",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/figure-it-out/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "fix-ci",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/fix-ci/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "fix-merge-conflicts",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/fix-merge-conflicts/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "get-pr-comments",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/get-pr-comments/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "google-docs",
+      "plugin": "google-docs",
+      "plugin_version": "1.1.0",
+      "source": "third_party/google-docs/skills/google-docs/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "This skill requires the corresponding MCP server to be configured separately."
+      ]
+    },
+    {
+      "name": "google-sheets",
+      "plugin": "google-sheets",
+      "plugin_version": "1.1.0",
+      "source": "third_party/google-sheets/skills/google-sheets/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "This skill requires the corresponding MCP server to be configured separately."
+      ]
+    },
+    {
+      "name": "google-slides",
+      "plugin": "google-slides",
+      "plugin_version": "1.1.0",
+      "source": "third_party/google-slides/skills/google-slides/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "This skill requires the corresponding MCP server to be configured separately."
+      ]
+    },
+    {
+      "name": "how",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/how/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "interrogate",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/interrogate/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "loop-on-ci",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/loop-on-ci/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "maintain-verification-skill",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/maintain-verification-skill/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "make-bot-ui",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/make-bot-ui/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "make-pr-easy-to-review",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/make-pr-easy-to-review/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "new-branch-and-pr",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/new-branch-and-pr/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "no-comments",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/no-comments/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
+      ]
+    },
+    {
+      "name": "orchestrate",
+      "plugin": "orchestrate",
+      "plugin_version": "1.1.0",
+      "source": "orchestrate/skills/orchestrate/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "poteto-mode",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/poteto-mode/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
+      ]
+    },
+    {
+      "name": "pr-review-canvas",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/pr-review-canvas/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-attack-the-premise",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-attack-the-premise/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-boundary-discipline",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-boundary-discipline/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-build-the-lever",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-build-the-lever/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-encode-lessons-in-structure",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-encode-lessons-in-structure/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-exhaust-the-design-space",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-exhaust-the-design-space/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-experience-first",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-experience-first/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-fix-root-causes",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-fix-root-causes/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-foundational-thinking",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-foundational-thinking/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-guard-the-context-window",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-guard-the-context-window/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-laziness-protocol",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-laziness-protocol/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-make-operations-idempotent",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-make-operations-idempotent/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-migrate-callers-then-delete-legacy-apis",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-minimize-reader-load",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-minimize-reader-load/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-model-the-domain",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-model-the-domain/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-never-block-on-the-human",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-never-block-on-the-human/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-outcome-oriented-execution",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-outcome-oriented-execution/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-prove-it-works",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-prove-it-works/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-redesign-from-first-principles",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-redesign-from-first-principles/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-separate-before-serializing-shared-state",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-separate-before-serializing-shared-state/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-sequence-verifiable-units",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-sequence-verifiable-units/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-subtract-before-you-add",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-subtract-before-you-add/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-test-behavior-not-implementation",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-test-behavior-not-implementation/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "principle-type-system-discipline",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/principle-type-system-discipline/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "ralph-loop",
+      "plugin": "ralph-loop",
+      "plugin_version": "1.0.0",
+      "source": "ralph-loop/skills/ralph-loop/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable."
+      ]
+    },
+    {
+      "name": "ralph-loop-help",
+      "plugin": "ralph-loop",
+      "plugin_version": "1.0.0",
+      "source": "ralph-loop/skills/ralph-loop-help/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable."
+      ]
+    },
+    {
+      "name": "recall",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/recall/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
+      ]
+    },
+    {
+      "name": "reflect",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/reflect/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
+      ]
+    },
+    {
+      "name": "review-and-ship",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/review-and-ship/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "review-plugin-submission",
+      "plugin": "create-plugin",
+      "plugin_version": "1.0.0",
+      "source": "create-plugin/skills/review-plugin-submission/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "run-learning-retrospective",
+      "plugin": "teaching",
+      "plugin_version": "1.0.0",
+      "source": "teaching/skills/run-learning-retrospective/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "run-smoke-tests",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/run-smoke-tests/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "setup-pstack",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/setup-pstack/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "show-me-your-work",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/show-me-your-work/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
+      ]
+    },
+    {
+      "name": "swarm",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/swarm/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "tdd",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/tdd/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "teach",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/teach/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "technical-writing",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/technical-writing/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "thermo-nuclear-code-quality-review",
+      "plugin": "thermos",
+      "plugin_version": "1.0.0",
+      "source": "thermos/skills/thermo-nuclear-code-quality-review/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "thermo-nuclear-review",
+      "plugin": "thermos",
+      "plugin_version": "1.0.0",
+      "source": "thermos/skills/thermo-nuclear-review/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "thermos",
+      "plugin": "thermos",
+      "plugin_version": "1.0.0",
+      "source": "thermos/skills/thermos/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": [
+        "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
+      ]
+    },
+    {
+      "name": "typescript-best-practices",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/typescript-best-practices/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "unslop",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/unslop/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "verify-this",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/verify-this/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "weekly-review",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/weekly-review/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "what-did-i-get-done",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/what-did-i-get-done/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "why",
+      "plugin": "pstack",
+      "plugin_version": "0.15.5",
+      "source": "pstack/skills/why/SKILL.md",
+      "explicit_only": true,
+      "compatibility_notes": []
+    },
+    {
+      "name": "workflow-from-chats",
+      "plugin": "cursor-team-kit",
+      "plugin_version": "1.2.0",
+      "source": "cursor-team-kit/skills/workflow-from-chats/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": []
+    },
+    {
+      "name": "x-api-mcp-guide",
+      "plugin": "x",
+      "plugin_version": "2.5.0",
+      "source": "third_party/x/skills/x-api-mcp-guide/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "This skill requires the corresponding MCP server to be configured separately."
+      ]
+    },
+    {
+      "name": "x-chat",
+      "plugin": "x",
+      "plugin_version": "2.5.0",
+      "source": "third_party/x/skills/x-chat/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "This skill requires the corresponding MCP server to be configured separately."
+      ]
+    },
+    {
+      "name": "x-money-guide",
+      "plugin": "x-money",
+      "plugin_version": "1.0.0",
+      "source": "third_party/x-money/skills/x-money-guide/SKILL.md",
+      "explicit_only": false,
+      "compatibility_notes": [
+        "This skill requires the corresponding MCP server to be configured separately."
+      ]
+    }
+  ]
+}

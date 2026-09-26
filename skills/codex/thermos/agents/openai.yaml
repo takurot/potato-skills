@@ -1,0 +1,5 @@
+interface:
+  display_name: "Thermos"
+  short_description: "Launch both thermo-nuclear review subagents in parallel,..."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Google Docs"
+  short_description: "Author and edit Google Docs with the google-docs tools -..."

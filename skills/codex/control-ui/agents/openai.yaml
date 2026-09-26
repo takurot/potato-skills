@@ -1,0 +1,3 @@
+interface:
+  display_name: "Control Ui"
+  short_description: "Build or adapt a local browser/CDP harness to drive and..."

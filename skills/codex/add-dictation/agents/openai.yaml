@@ -1,0 +1,3 @@
+interface:
+  display_name: "Add Dictation"
+  short_description: "Use when the user runs /add-dictation or wants speech turned..."

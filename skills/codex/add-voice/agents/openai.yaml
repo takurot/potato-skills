@@ -1,0 +1,3 @@
+interface:
+  display_name: "Add Voice"
+  short_description: "Use when the user runs /add-voice, types Voice Mode, or asks..."

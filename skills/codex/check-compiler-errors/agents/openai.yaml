@@ -1,0 +1,3 @@
+interface:
+  display_name: "Check Compiler Errors"
+  short_description: "Run compile and type-check commands and report failures"

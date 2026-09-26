@@ -1,0 +1,5 @@
+interface:
+  display_name: "Continual Learning"
+  short_description: "Orchestrate continual learning by delegating transcript..."
+policy:
+  allow_implicit_invocation: false

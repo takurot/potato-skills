@@ -1,0 +1,5 @@
+interface:
+  display_name: "Principle Redesign From First Principles"
+  short_description: "Apply when integrating a new requirement into an existing..."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Create Plugin Scaffold"
+  short_description: "Create a new Cursor plugin scaffold with a valid manifest,..."

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Principle Outcome Oriented Execution"
+  short_description: "Apply during planned rewrites and migrations with explicit..."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Setup Pstack"
+  short_description: "Configure which models pstack uses per role and at what..."

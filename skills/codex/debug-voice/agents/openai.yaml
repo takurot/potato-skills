@@ -1,0 +1,3 @@
+interface:
+  display_name: "Debug Voice"
+  short_description: "Use when the user runs /debug-voice, says voice mode has..."

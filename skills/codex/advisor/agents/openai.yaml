@@ -1,0 +1,3 @@
+interface:
+  display_name: "Advisor"
+  short_description: "Advisor mode. Consult a stronger (or different) model at key..."

@@ -1,0 +1,3 @@
+interface:
+  display_name: "X Chat"
+  short_description: "Read, summarize, or send encrypted X Chat (XChat) DMs via..."

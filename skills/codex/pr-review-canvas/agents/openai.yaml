@@ -1,0 +1,5 @@
+interface:
+  display_name: "Pr Review Canvas"
+  short_description: "Generate an interactive PR review walkthrough as an HTML..."
+policy:
+  allow_implicit_invocation: false

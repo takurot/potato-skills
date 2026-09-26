@@ -1,0 +1,3 @@
+interface:
+  display_name: "Cli For Agents"
+  short_description: "Designs or reviews CLIs so coding agents can run them..."

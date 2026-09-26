@@ -1,0 +1,3 @@
+interface:
+  display_name: "Add Read Aloud"
+  short_description: "Use when the user runs /add-read-aloud or wants the app to..."

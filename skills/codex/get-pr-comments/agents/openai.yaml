@@ -1,0 +1,3 @@
+interface:
+  display_name: "Get Pr Comments"
+  short_description: "Fetch and summarize review comments from the active pull request"

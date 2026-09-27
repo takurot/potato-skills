@@ -199,6 +199,14 @@ install_platform() {
     [ -d "$source_skill" ] || continue
     name=${source_skill##*/}
     is_selected "$name" || continue
+    if [ -f "$source_skill/EXPERIMENTAL.md" ]; then
+      if [ "$SELECTOR_PROVIDED" -eq 0 ]; then
+        printf 'excluded  %s: %s (experimental; select explicitly with --skill)\n' \
+          "$platform" "$name"
+        continue
+      fi
+      printf 'warning: %s is experimental and is not installed by default\n' "$name"
+    fi
     found=$((found + 1))
     destination="$destination_root/$name"
 

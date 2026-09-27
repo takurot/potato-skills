@@ -70,11 +70,69 @@ class InstallerSelectionTests(unittest.TestCase):
     def test_omitting_skill_selects_every_manifest_entry(self) -> None:
         result = self.run_installer()
         manifest = json.loads((ROOT / "skills" / "manifest.json").read_text())
+        default_count = sum(
+            entry.get("default_install", True) for entry in manifest["skills"]
+        )
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(
-            result.stdout.count("would install "), manifest["skill_count"]
+        self.assertEqual(result.stdout.count("would install "), default_count)
+
+    def test_explicit_experimental_skill_is_available_with_warning(self) -> None:
+        result = self.run_installer("--skill", "docs-canvas")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("experimental", result.stdout.lower())
+        self.assertEqual(result.stdout.count("would install docs-canvas "), 1)
+
+
+class InstallerExperimentalTests(unittest.TestCase):
+    def run_project_install(
+        self, project: Path, *arguments: str
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                "bash",
+                str(INSTALLER),
+                "--target",
+                "codex",
+                "--scope",
+                "project",
+                "--project-dir",
+                str(project),
+                *arguments,
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
         )
+
+    def test_default_real_install_excludes_experimental_skill(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="potato-default-install-test-"
+        ) as directory:
+            project = Path(directory)
+            result = self.run_project_install(project)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("excluded  codex: docs-canvas", result.stdout)
+            self.assertFalse((project / ".agents/skills/docs-canvas").exists())
+            self.assertTrue((project / ".agents/skills/thermos/SKILL.md").is_file())
+
+    def test_explicit_real_install_includes_experimental_skill(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="potato-explicit-install-test-"
+        ) as directory:
+            project = Path(directory)
+            result = self.run_project_install(
+                project, "--skill", "docs-canvas"
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("warning: docs-canvas is experimental", result.stdout)
+            self.assertTrue(
+                (project / ".agents/skills/docs-canvas/SKILL.md").is_file()
+            )
 
 
 class InstallerRollbackTests(unittest.TestCase):

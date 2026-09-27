@@ -56,6 +56,12 @@ You can also select individual Skills:
 Each `--skill` value must be a non-empty, exact Skill name. Repeat the option to
 select multiple Skills; omit it entirely to install all Skills.
 
+The default set currently installs 90 production-ready Skills. `docs-canvas` is
+listed in `--list` but excluded because its upstream workflow is still a
+placeholder. To evaluate its host-specific fallback and bundled smoke artifact,
+select it explicitly with `--skill docs-canvas`; the installer prints an
+experimental warning.
+
 Main options:
 
 - `--dry-run` — Show planned operations without writing files

@@ -1,11 +1,12 @@
 ---
 name: docs-canvas
-description: "Render a documentation-style Cursor Canvas that organizes architecture notes, API references, walkthroughs, and how-tos into a navigable layout with sections, tables of contents, and cross-references. Use when the user asks for a docs canvas, documentation overview, architecture walkthrough, API reference page, or wants to render structured documentation as an interactive canvas."
+description: "[Experimental] Render a documentation-style Cursor Canvas that organizes architecture notes, API references, walkthroughs, and how-tos into a navigable layout with sections, tables of contents, and cross-references. Use when the user asks for a docs canvas, documentation overview, architecture walkthrough, API reference page, or wants to render structured documentation as an interactive canvas."
 ---
 
 > Claude Code compatibility: converted from Cursor plugin `docs-canvas` v0.1.0.
 > Use the host's equivalent tool or subagent interface when the text names a Cursor-specific control.
 > Never claim that an unavailable hook, MCP server, named agent, or Cursor service ran.
+> Experimental: excluded from default installation until live host evaluation passes.
 > When Cursor Canvas is unavailable, create a standalone HTML artifact with ordinary web technologies.
 
 # Docs Canvas
@@ -51,3 +52,33 @@ Write reader-facing prose. Lead with the answer or the headline, then explain. K
 ## Be creative
 
 The sections above are a floor, not a ceiling. The goal is the fastest possible path for the reader to understand the topic — so look at the source material in front of you and ask what representation would actually help. A diagram, a sequence chart, a side-by-side comparison, a decision tree, a glossary, a curated FAQ, a single large worked example — whatever fits.
+
+## Experimental host contract
+
+This converted Skill is experimental because its upstream workflow is still a placeholder.
+It is excluded from default installation. Use it only when the user explicitly selects it,
+and describe the result as an evaluation artifact rather than a production-ready canvas.
+
+### Cursor Canvas example
+
+Only when the active host actually exposes Cursor Canvas, read the installed Canvas SDK Skill
+and type declarations, build the documented section/card components, and verify the rendered
+canvas. Do not infer SDK availability from this text.
+
+### Claude Code fallback example
+
+Write one self-contained `docs-canvas.html` file in the requested project directory, then report its absolute path. Embed CSS, JavaScript, diagrams, and source citations in that file; do not claim that Cursor Canvas rendered it.
+
+### Required smoke evaluation
+
+Before reporting success, verify the produced artifact has all of the following:
+
+1. navigation links whose fragment targets exist;
+2. syntax-readable code blocks;
+3. at least one diagram with an accessible label or text alternative;
+4. cross-references that resolve to sections or cited source paths; and
+5. one standalone output that does not require local package trees or external assets.
+
+Use `references/smoke-example.html` as a structural baseline. Passing that static fixture is
+not evidence that Claude Code or Cursor Canvas rendered a newly generated artifact; report live
+rendering as unverified unless it was actually exercised.

@@ -26,6 +26,59 @@ PREFERRED_DUPLICATES = {
     ),
 }
 
+EXPERIMENTAL_SKILLS = {"docs-canvas"}
+
+DOCS_CANVAS_SMOKE_HTML = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docs Canvas smoke example</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; margin: 0 auto; max-width: 72rem; padding: 2rem; }
+    nav { position: sticky; top: 0; background: white; padding: 0.75rem 0; }
+    nav a { margin-right: 1rem; }
+    pre { overflow: auto; padding: 1rem; background: #f4f4f5; }
+    svg { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <header id="overview"><h1>Service documentation</h1><p>Standalone smoke artifact.</p></header>
+  <nav aria-label="Documentation sections">
+    <a href="#overview">Overview</a>
+    <a href="#example">Code</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#references">References</a>
+  </nav>
+  <main>
+    <section id="example"><h2>Code</h2><pre><code>curl https://api.example.test/health</code></pre></section>
+    <section id="architecture">
+      <h2>Architecture</h2>
+      <svg viewBox="0 0 420 100" role="img" aria-label="Client calls API">
+        <rect x="10" y="20" width="120" height="50"></rect>
+        <path d="M130 45 H285"></path>
+        <rect x="285" y="20" width="120" height="50"></rect>
+        <text x="35" y="52">Client</text><text x="325" y="52">API</text>
+      </svg>
+      <p>See the <a href="#references">source references</a>.</p>
+    </section>
+    <section id="references"><h2>References</h2><ul><li><code>src/api.ts</code></li></ul></section>
+  </main>
+</body>
+</html>
+"""
+
+DOCS_CANVAS_EXPERIMENTAL_NOTICE = """# Experimental Skill
+
+`docs-canvas` is converted from an upstream placeholder and is not installed by default.
+Install it explicitly with `--skill docs-canvas` only when you want to evaluate it.
+
+Promotion requires verified Cursor Canvas rendering plus Claude Code and Codex fallback
+evaluation for navigation, code blocks, diagrams, cross-references, and a standalone artifact.
+The bundled `references/smoke-example.html` is a structural smoke fixture, not proof of a
+successful live-host rendering.
+"""
+
 
 @dataclass(frozen=True)
 class SourceSkill:
@@ -194,6 +247,10 @@ def yaml_string(value: str) -> str:
 def compatibility_notes(skill: SourceSkill) -> list[str]:
     notes: list[str] = []
     combined = skill.body.lower()
+    if skill.name in EXPERIMENTAL_SKILLS:
+        notes.append(
+            "Experimental: excluded from default installation until live host evaluation passes."
+        )
     if skill.has_hooks:
         notes.append("Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable.")
     if referenced_agent_files(skill):
@@ -504,6 +561,58 @@ interrogate reviewers: inherit-parent"""
     return body
 
 
+def adapt_docs_canvas(skill_name: str, body: str, host: str) -> str:
+    if skill_name != "docs-canvas":
+        return body
+
+    if host == "Claude Code":
+        fallback_example = (
+            "### Claude Code fallback example\n\n"
+            "Write one self-contained `docs-canvas.html` file in the requested project "
+            "directory, then report its absolute path. Embed CSS, JavaScript, diagrams, and "
+            "source citations in that file; do not claim that Cursor Canvas rendered it."
+        )
+    else:
+        fallback_example = (
+            "### Codex fallback example\n\n"
+            "Write one self-contained `docs-canvas.html` file in the workspace and return a "
+            "clickable local file link. Embed CSS, JavaScript, diagrams, and source citations "
+            "in that file; do not claim that Cursor Canvas rendered it."
+        )
+
+    evaluation = f"""
+
+## Experimental host contract
+
+This converted Skill is experimental because its upstream workflow is still a placeholder.
+It is excluded from default installation. Use it only when the user explicitly selects it,
+and describe the result as an evaluation artifact rather than a production-ready canvas.
+
+### Cursor Canvas example
+
+Only when the active host actually exposes Cursor Canvas, read the installed Canvas SDK Skill
+and type declarations, build the documented section/card components, and verify the rendered
+canvas. Do not infer SDK availability from this text.
+
+{fallback_example}
+
+### Required smoke evaluation
+
+Before reporting success, verify the produced artifact has all of the following:
+
+1. navigation links whose fragment targets exist;
+2. syntax-readable code blocks;
+3. at least one diagram with an accessible label or text alternative;
+4. cross-references that resolve to sections or cited source paths; and
+5. one standalone output that does not require local package trees or external assets.
+
+Use `references/smoke-example.html` as a structural baseline. Passing that static fixture is
+not evidence that {host} or Cursor Canvas rendered a newly generated artifact; report live
+rendering as unverified unless it was actually exercised.
+"""
+    return body.rstrip() + evaluation
+
+
 def adapt_body(skill: SourceSkill, target: str) -> str:
     if target == "claude-code":
         user_skills = "~/.claude/skills/"
@@ -583,6 +692,7 @@ def adapt_body(skill: SourceSkill, target: str) -> str:
     body = adapt_hookless_workflow(skill.name, body, host)
     body = adapt_pr_review_canvas(skill.name, body)
     body = adapt_pstack_config(skill.name, body, models_file)
+    body = adapt_docs_canvas(skill.name, body, host)
 
     notes = compatibility_notes(skill)
     preface = [
@@ -722,6 +832,16 @@ def write_skill(skill: SourceSkill, target: str, destination: Path) -> None:
     destination.mkdir(parents=True)
     copy_support_files(skill, destination, target)
     description = skill.description
+    if skill.name in EXPERIMENTAL_SKILLS:
+        description = f"[Experimental] {description}"
+        (destination / "EXPERIMENTAL.md").write_text(
+            DOCS_CANVAS_EXPERIMENTAL_NOTICE, encoding="utf-8"
+        )
+        references = destination / "references"
+        references.mkdir(exist_ok=True)
+        (references / "smoke-example.html").write_text(
+            DOCS_CANVAS_SMOKE_HTML, encoding="utf-8"
+        )
     if skill.name == "setup-pstack":
         description = description.replace(
             "writes an always-applied rule that overrides the skill defaults",
@@ -746,7 +866,7 @@ def write_skill(skill: SourceSkill, target: str, destination: Path) -> None:
         lines = [
             "interface:",
             f"  display_name: {yaml_string(skill.name.replace('-', ' ').title())}",
-            f"  short_description: {yaml_string(short_description(skill.description))}",
+            f"  short_description: {yaml_string(short_description(description))}",
         ]
         if skill.explicit_only:
             lines.extend(["policy:", "  allow_implicit_invocation: false"])
@@ -807,6 +927,8 @@ def build(source: Path, output: Path) -> None:
                 "plugin_version": skill.plugin_version,
                 "source": str(skill.source_file.relative_to(source)),
                 "explicit_only": skill.explicit_only,
+                "experimental": skill.name in EXPERIMENTAL_SKILLS,
+                "default_install": skill.name not in EXPERIMENTAL_SKILLS,
                 "compatibility_notes": compatibility_notes(skill),
             }
         )

@@ -11,6 +11,8 @@
       "plugin_version": "0.1.0",
       "source": "grok-voice/skills/add-dictation/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -19,6 +21,8 @@
       "plugin_version": "0.1.0",
       "source": "grok-voice/skills/add-read-aloud/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -27,6 +31,8 @@
       "plugin_version": "0.1.0",
       "source": "grok-voice/skills/add-voice/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -35,6 +41,8 @@
       "plugin_version": "1.0.0",
       "source": "advisor/skills/advisor/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable.",
         "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
@@ -46,6 +54,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/architect/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -54,6 +64,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/arena/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -62,6 +74,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/automate-me/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
       ]
@@ -72,6 +86,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/blast-radius/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -80,6 +96,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/bro/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -88,6 +106,8 @@
       "plugin_version": "1.0.0",
       "source": "ralph-loop/skills/cancel-ralph/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable."
       ]
@@ -98,6 +118,8 @@
       "plugin_version": "1.0.0",
       "source": "agent-compatibility/skills/check-agent-compatibility/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
       ]
@@ -108,6 +130,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/check-compiler-errors/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -116,6 +140,8 @@
       "plugin_version": "1.0.0",
       "source": "cli-for-agent/skills/cli-for-agents/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -124,6 +150,8 @@
       "plugin_version": "1.0.0",
       "source": "continual-learning/skills/continual-learning/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable.",
         "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
@@ -135,6 +163,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/control-cli/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -143,6 +173,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/control-ui/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -151,6 +183,8 @@
       "plugin_version": "1.0.0",
       "source": "teaching/skills/create-learning-path/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -159,6 +193,8 @@
       "plugin_version": "1.0.0",
       "source": "create-plugin/skills/create-plugin-scaffold/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -167,6 +203,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/create-verification-skill/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -175,6 +213,8 @@
       "plugin_version": "1.0.0",
       "source": "cursor-sdk/skills/cursor-sdk/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "When Cursor Canvas is unavailable, create a standalone HTML artifact with ordinary web technologies.",
         "Cursor SDK operations still require Cursor credentials and services; the host agent does not replace them."
@@ -186,6 +226,8 @@
       "plugin_version": "0.1.0",
       "source": "grok-voice/skills/debug-voice/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -194,6 +236,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/deslop/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -202,7 +246,10 @@
       "plugin_version": "0.1.0",
       "source": "docs-canvas/skills/docs-canvas/SKILL.md",
       "explicit_only": false,
+      "experimental": true,
+      "default_install": false,
       "compatibility_notes": [
+        "Experimental: excluded from default installation until live host evaluation passes.",
         "When Cursor Canvas is unavailable, create a standalone HTML artifact with ordinary web technologies."
       ]
     },
@@ -212,6 +259,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/figure-it-out/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -220,6 +269,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/fix-ci/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -228,6 +279,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/fix-merge-conflicts/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -236,6 +289,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/get-pr-comments/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -244,6 +299,8 @@
       "plugin_version": "1.1.0",
       "source": "third_party/google-docs/skills/google-docs/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "This skill requires the corresponding MCP server to be configured separately."
       ]
@@ -254,6 +311,8 @@
       "plugin_version": "1.1.0",
       "source": "third_party/google-sheets/skills/google-sheets/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "This skill requires the corresponding MCP server to be configured separately."
       ]
@@ -264,6 +323,8 @@
       "plugin_version": "1.1.0",
       "source": "third_party/google-slides/skills/google-slides/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "This skill requires the corresponding MCP server to be configured separately."
       ]
@@ -274,6 +335,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/how/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -282,6 +345,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/interrogate/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -290,6 +355,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/loop-on-ci/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -298,6 +365,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/maintain-verification-skill/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -306,6 +375,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/make-bot-ui/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -314,6 +385,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/make-pr-easy-to-review/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -322,6 +395,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/new-branch-and-pr/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -330,6 +405,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/no-comments/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
       ]
@@ -340,6 +417,8 @@
       "plugin_version": "1.1.0",
       "source": "orchestrate/skills/orchestrate/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -348,6 +427,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/poteto-mode/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
       ]
@@ -358,6 +439,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/pr-review-canvas/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -366,6 +449,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-attack-the-premise/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -374,6 +459,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-boundary-discipline/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -382,6 +469,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-build-the-lever/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -390,6 +479,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-encode-lessons-in-structure/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -398,6 +489,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-exhaust-the-design-space/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -406,6 +499,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-experience-first/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -414,6 +509,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-fix-root-causes/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -422,6 +519,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-foundational-thinking/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -430,6 +529,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-guard-the-context-window/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -438,6 +539,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-laziness-protocol/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -446,6 +549,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-make-operations-idempotent/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -454,6 +559,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -462,6 +569,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-minimize-reader-load/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -470,6 +579,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-model-the-domain/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -478,6 +589,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-never-block-on-the-human/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -486,6 +599,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-outcome-oriented-execution/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -494,6 +609,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-prove-it-works/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -502,6 +619,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-redesign-from-first-principles/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -510,6 +629,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-separate-before-serializing-shared-state/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -518,6 +639,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-sequence-verifiable-units/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -526,6 +649,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-subtract-before-you-add/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -534,6 +659,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-test-behavior-not-implementation/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -542,6 +669,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/principle-type-system-discipline/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -550,6 +679,8 @@
       "plugin_version": "1.0.0",
       "source": "ralph-loop/skills/ralph-loop/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable."
       ]
@@ -560,6 +691,8 @@
       "plugin_version": "1.0.0",
       "source": "ralph-loop/skills/ralph-loop-help/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor hooks are not installed; hook-driven repetition or lifecycle automation is unavailable."
       ]
@@ -570,6 +703,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/recall/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
       ]
@@ -580,6 +715,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/reflect/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
       ]
@@ -590,6 +727,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/review-and-ship/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -598,6 +737,8 @@
       "plugin_version": "1.0.0",
       "source": "create-plugin/skills/review-plugin-submission/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -606,6 +747,8 @@
       "plugin_version": "1.0.0",
       "source": "teaching/skills/run-learning-retrospective/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -614,6 +757,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/run-smoke-tests/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -622,6 +767,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/setup-pstack/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -630,6 +777,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/show-me-your-work/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host."
       ]
@@ -640,6 +789,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/swarm/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -648,6 +799,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/tdd/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -656,6 +809,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/teach/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -664,6 +819,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/technical-writing/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -672,6 +829,8 @@
       "plugin_version": "1.0.0",
       "source": "thermos/skills/thermo-nuclear-code-quality-review/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -680,6 +839,8 @@
       "plugin_version": "1.0.0",
       "source": "thermos/skills/thermo-nuclear-review/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -688,6 +849,8 @@
       "plugin_version": "1.0.0",
       "source": "thermos/skills/thermos/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "Original agent definitions are bundled under references/cursor-agents for use as subagent prompts."
       ]
@@ -698,6 +861,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/typescript-best-practices/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -706,6 +871,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/unslop/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -714,6 +881,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/verify-this/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -722,6 +891,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/weekly-review/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -730,6 +901,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/what-did-i-get-done/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -738,6 +911,8 @@
       "plugin_version": "0.15.5",
       "source": "pstack/skills/why/SKILL.md",
       "explicit_only": true,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -746,6 +921,8 @@
       "plugin_version": "1.2.0",
       "source": "cursor-team-kit/skills/workflow-from-chats/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": []
     },
     {
@@ -754,6 +931,8 @@
       "plugin_version": "2.5.0",
       "source": "third_party/x/skills/x-api-mcp-guide/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "This skill requires the corresponding MCP server to be configured separately."
       ]
@@ -764,6 +943,8 @@
       "plugin_version": "2.5.0",
       "source": "third_party/x/skills/x-chat/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "This skill requires the corresponding MCP server to be configured separately."
       ]
@@ -774,6 +955,8 @@
       "plugin_version": "1.0.0",
       "source": "third_party/x-money/skills/x-money-guide/SKILL.md",
       "explicit_only": false,
+      "experimental": false,
+      "default_install": true,
       "compatibility_notes": [
         "This skill requires the corresponding MCP server to be configured separately."
       ]

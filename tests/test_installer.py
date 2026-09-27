@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -74,6 +75,187 @@ class InstallerSelectionTests(unittest.TestCase):
         self.assertEqual(
             result.stdout.count("would install "), manifest["skill_count"]
         )
+
+
+class InstallerRollbackTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary_directory = tempfile.TemporaryDirectory(
+            prefix="potato-installer-rollback-test-"
+        )
+        self.project = Path(self.temporary_directory.name) / "project with spaces"
+        self.project.mkdir()
+        self.skills_root = self.project / ".claude" / "skills"
+        self.destination = self.skills_root / "thermos"
+
+    def tearDown(self) -> None:
+        self.temporary_directory.cleanup()
+
+    def run_installer(
+        self, *arguments: str, extra_env: dict[str, str] | None = None
+    ) -> subprocess.CompletedProcess[str]:
+        environment = os.environ.copy()
+        if extra_env:
+            environment.update(extra_env)
+        return subprocess.run(
+            [
+                "bash",
+                str(INSTALLER),
+                "--target",
+                "claude",
+                "--scope",
+                "project",
+                "--project-dir",
+                str(self.project),
+                "--skill",
+                "thermos",
+                *arguments,
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=environment,
+        )
+
+    def seed_original_skill(self) -> None:
+        self.destination.mkdir(parents=True)
+        (self.destination / "SKILL.md").write_text(
+            "original installation\n", encoding="utf-8"
+        )
+
+    def create_fault_command(self, name: str, body: str) -> Path:
+        bin_directory = self.project / "fault-bin"
+        bin_directory.mkdir(exist_ok=True)
+        command = bin_directory / name
+        command.write_text(f"#!/bin/sh\n{body}\n", encoding="utf-8")
+        command.chmod(0o755)
+        return bin_directory
+
+    def assert_no_staging_directories(self) -> None:
+        if self.skills_root.exists():
+            self.assertEqual(
+                list(self.skills_root.glob(".potato-skills.*")), []
+            )
+
+    def test_claude_backup_is_outside_skill_discovery(self) -> None:
+        self.seed_original_skill()
+
+        result = self.run_installer("--force")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        backups = list(
+            (self.project / ".claude" / "skill-backups").glob(
+                "thermos.backup.*"
+            )
+        )
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(
+            (backups[0] / "SKILL.md").read_text(encoding="utf-8"),
+            "original installation\n",
+        )
+        self.assertNotEqual(
+            (self.destination / "SKILL.md").read_text(encoding="utf-8"),
+            "original installation\n",
+        )
+        self.assert_no_staging_directories()
+
+    def test_dangling_symlink_is_a_conflict(self) -> None:
+        self.skills_root.mkdir(parents=True)
+        self.destination.symlink_to(self.project / "missing-skill")
+
+        result = self.run_installer()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("skipped", result.stdout)
+        self.assertTrue(self.destination.is_symlink())
+
+    def test_regular_file_is_a_conflict(self) -> None:
+        self.skills_root.mkdir(parents=True)
+        self.destination.write_text("not a directory\n", encoding="utf-8")
+
+        result = self.run_installer()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("skipped", result.stdout)
+        self.assertEqual(
+            self.destination.read_text(encoding="utf-8"), "not a directory\n"
+        )
+
+    def test_copy_failure_preserves_original_and_cleans_stage(self) -> None:
+        self.seed_original_skill()
+        bin_directory = self.create_fault_command("cp", "exit 41")
+
+        result = self.run_installer(
+            "--force",
+            extra_env={"PATH": f"{bin_directory}:{os.environ['PATH']}"},
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(
+            (self.destination / "SKILL.md").read_text(encoding="utf-8"),
+            "original installation\n",
+        )
+        self.assert_no_staging_directories()
+
+    def test_backup_failure_preserves_original_and_cleans_stage(self) -> None:
+        self.seed_original_skill()
+        bin_directory = self.create_fault_command("mv", "exit 42")
+
+        result = self.run_installer(
+            "--force",
+            extra_env={"PATH": f"{bin_directory}:{os.environ['PATH']}"},
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(
+            (self.destination / "SKILL.md").read_text(encoding="utf-8"),
+            "original installation\n",
+        )
+        self.assert_no_staging_directories()
+
+    def test_activation_failure_restores_original_and_cleans_stage(self) -> None:
+        self.seed_original_skill()
+        counter = self.project / "mv-count"
+        bin_directory = self.create_fault_command(
+            "mv",
+            """count=0
+[ ! -f "$MV_COUNT_FILE" ] || count=$(cat "$MV_COUNT_FILE")
+count=$((count + 1))
+printf '%s\\n' "$count" > "$MV_COUNT_FILE"
+[ "$count" -ne 2 ] || exit 43
+exec /bin/mv "$@"
+""".strip(),
+        )
+
+        result = self.run_installer(
+            "--force",
+            extra_env={
+                "PATH": f"{bin_directory}:{os.environ['PATH']}",
+                "MV_COUNT_FILE": str(counter),
+            },
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(counter.read_text(encoding="utf-8"), "3\n")
+        self.assertIn("restored", result.stderr)
+        self.assertEqual(
+            (self.destination / "SKILL.md").read_text(encoding="utf-8"),
+            "original installation\n",
+        )
+        self.assert_no_staging_directories()
+
+    def test_interruption_cleans_stage(self) -> None:
+        bin_directory = self.create_fault_command(
+            "cp", 'kill -TERM "$PPID"\nsleep 1\nexit 44'
+        )
+
+        result = self.run_installer(
+            extra_env={"PATH": f"{bin_directory}:{os.environ['PATH']}"}
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.destination.exists())
+        self.assert_no_staging_directories()
 
 
 if __name__ == "__main__":

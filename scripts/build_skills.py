@@ -348,6 +348,34 @@ def adapt_hookless_workflow(skill_name: str, body: str, host: str) -> str:
     return body
 
 
+def adapt_pr_review_canvas(skill_name: str, body: str) -> str:
+    if skill_name != "pr-review-canvas":
+        return body
+
+    body = body.replace(
+        "gh api repos/{owner}/{repo}/pulls/{number}/files --paginate \\\n"
+        "  --jq '[.[] | {key: (.filename | gsub(\"[^a-zA-Z0-9]\"; \"_\")), "
+        "value: (.patch // \"\")}] | from_entries' \\\n"
+        "  > /tmp/pr-patches-{number}.json",
+        "gh api repos/{owner}/{repo}/pulls/{number}/files --paginate \\\n"
+        "  --jq '.[] | {key: .filename, value: (.patch // \"\")}' \\\n"
+        "  | jq -s 'from_entries' \\\n"
+        "  > /tmp/pr-patches-{number}.json",
+    )
+    body = body.replace(
+        "The diff data keys should match the `data-diff` attribute values in the HTML:\n"
+        "```html\n<div data-diff=\"path_to_file_ts\"></div>\n```",
+        "The JSON key remains the exact original filename so distinct paths never collide. "
+        "The `data-diff` attribute must contain that same filename with HTML attribute "
+        "escaping only; the browser decodes the attribute before the renderer uses it as a "
+        "JSON key. When generating placeholders in Python, use:\n"
+        "```python\nimport html\n\n"
+        "safe_filename = html.escape(filename, quote=True)\n"
+        "placeholder = f'<div data-diff=\"{safe_filename}\"></div>'\n```",
+    )
+    return body
+
+
 def adapt_body(skill: SourceSkill, target: str) -> str:
     if target == "claude-code":
         user_skills = "~/.claude/skills/"
@@ -425,6 +453,7 @@ def adapt_body(skill: SourceSkill, target: str) -> str:
         "the current conversation and decision log.",
     )
     body = adapt_hookless_workflow(skill.name, body, host)
+    body = adapt_pr_review_canvas(skill.name, body)
 
     notes = compatibility_notes(skill)
     preface = [

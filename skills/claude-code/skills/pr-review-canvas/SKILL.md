@@ -111,7 +111,8 @@ Put `<div data-diff="KEY"></div>` placeholders in your body HTML wherever you wa
 1. During the fetch step, save patches to a JSON file using `jq` (which handles escaping correctly):
 ```bash
 gh api repos/{owner}/{repo}/pulls/{number}/files --paginate \
-  --jq '[.[] | {key: (.filename | gsub("[^a-zA-Z0-9]"; "_")), value: (.patch // "")}] | from_entries' \
+  --jq '.[] | {key: .filename, value: (.patch // "")}' \
+  | jq -s 'from_entries' \
   > /tmp/pr-patches-{number}.json
 ```
 
@@ -143,9 +144,12 @@ PY
 
 This guarantees valid JSON and script-safe HTML embedding. The agent writes body HTML to a temp file, then Python assembles everything safely.
 
-The diff data keys should match the `data-diff` attribute values in the HTML:
-```html
-<div data-diff="path_to_file_ts"></div>
+The JSON key remains the exact original filename so distinct paths never collide. The `data-diff` attribute must contain that same filename with HTML attribute escaping only; the browser decodes the attribute before the renderer uses it as a JSON key. When generating placeholders in Python, use:
+```python
+import html
+
+safe_filename = html.escape(filename, quote=True)
+placeholder = f'<div data-diff="{safe_filename}"></div>'
 ```
 
 Since renderer.js loads in `<head>`, you can also call `renderDiff(target, lines)` directly from inline `<script>` tags if needed for custom use cases. The function accepts a DOM element, ID string, or CSS selector as `target`, and a string or array as `lines`.

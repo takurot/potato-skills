@@ -1,6 +1,6 @@
 ---
 name: setup-pstack
-description: "Configure which models pstack uses per role and at what reasoning budget. Detects your available models and writes an always-applied rule that overrides the skill defaults. Use for /setup-pstack, \"configure pstack models\", \"pstack budget\", or changing pstack's model choices."
+description: "Configure which models pstack uses per role and at what reasoning budget. Detects your available models and writes a shared file that converted pstack Skills read explicitly. Use for /setup-pstack, \"configure pstack models\", \"pstack budget\", or changing pstack's model choices."
 license: MIT
 ---
 
@@ -10,13 +10,13 @@ license: MIT
 
 # Setup pstack
 
-Write `~/.codex/pstack-models.md`, an always-applied rule that sets pstack's model per role.
+Write `~/.codex/pstack-models.md`, a shared configuration file that each converted pstack Skill reads explicitly. It is not loaded automatically by the host.
 
 ## Steps
 
 ### 1. Detect available models
 
-Enumerate the model slugs you can pass to a `Task` subagent in this session. That is the dependable source. If Cursor also exposes a models API or CLI that lists the user's entitled models, prefer it for completeness. If you cannot detect any, ask the user to paste the slugs they have access to. Never write a real slug you have not confirmed is available. The aliases `inherit-parent` and `auto` are always valid even though they are not detected slugs.
+Use the current host's subagent interface or its validation error to obtain model identifiers it actually accepts in this session. Do not use a Cursor model API for Claude Code or Codex. If the host cannot enumerate models without running a paid call, ask the user to select from identifiers already accepted in this session, or use `inherit-parent`. Never write an unverified real identifier. The aliases `inherit-parent` and `auto` mean to omit the subagent model parameter.
 
 ### 2. Load current state
 
@@ -31,7 +31,7 @@ The default role-to-model mapping is the rule shape shown in step 5 below. If `~
 - `medium — high reasoning`
 - `small — medium reasoning`
 
-**(b) Apply it.** Build the working table from the skill defaults, and on a re-run keep any role you changed by family, list, or alias (`inherit-parent`, `auto`). `unlimited` leaves every effort as in that table. `large`, `medium`, and `small` set the effort token of every real slug, panel entries included, to `xhigh`, `high`, or `medium`. The effort token is the last token, or the one before a trailing `fast`, on the ladder `max` > `xhigh` > `high` > `medium` > `low`. If the result is not a detected slug, use the same family's detected slug with the highest effort at or below the target, else mark the role as needing a choice. `inherit-parent` and `auto` do not change. So `small` turns `claude-opus-5-5-max` into `claude-opus-5-5-medium`, and `grok-4.7-xhigh-fast` into `grok-4.7-medium-fast`.
+**(b) Apply it.** Treat the budget as a selection preference, not as syntax inside a model name. Choose only exact identifiers accepted by the current host. If the host exposes reasoning effort separately, set it through that interface. If it exposes distinct model identifiers for effort tiers, choose only an identifier present in the accepted set. Do not construct a model identifier by editing a suffix. When no accepted identifier satisfies the requested budget, mark the role as needing a choice or use `inherit-parent` after confirmation.
 
 **(c) Show the roles and confirm.** Show every role with its model, marking any real slug not in the detected set as needing a choice. Also list each line step 2 dropped. Ask whether to accept as-is or change specific roles, offering the detected models plus `inherit-parent` and `auto` (both mean: this role runs on the parent chat model, which is how Auto users stay on Auto) as the options. Prefer AskQuestion over free text. For panel roles (arena runners, architect runners, interrogate reviewers) the value is a list, and one subagent runs per entry, alias entries included, so the list length sets the count. `arena cross-judge pool` is also a list, but Arena selects one value from it whose model family differs from the parent's when possible. `swarm workers` is the default model for every worker unless a race or comparison assigns another model per arm.
 
@@ -41,38 +41,34 @@ Every real slug written must be in the detected set. `inherit-parent` and `auto`
 
 ### 5. Write the rule
 
-Write `~/.codex/pstack-models.md` with `alwaysApply: true`, a `# budget` line with the chosen label and its target effort, and one line per role, using the same labels poteto-mode uses. Overwrite the whole file so re-runs stay idempotent. Shape:
+Write `~/.codex/pstack-models.md` as plain Markdown with a `# budget` comment and one line per role. This file is not host configuration; converted pstack consumers read it explicitly. Overwrite the whole file so re-runs stay idempotent. Use only exact identifiers accepted by the current host. Shape:
 
 ```
----
-description: pstack per-role model choices (overrides skill defaults)
-alwaysApply: true
----
-# pstack model configuration. One line per role. Delete a line to fall back to the skill default.
-# `inherit-parent` or `auto` as a value: the role runs on the parent chat model (omit Task `model`). Alias entries in a panel list still count toward its fan-out.
-# budget: unlimited (max)
-feature, refactoring: grok-4.7-xhigh-fast
-bug-fix: grok-4.7-xhigh-fast
-perf-issue: grok-4.7-xhigh-fast
-hillclimb: grok-4.7-xhigh-fast
-judgment and prose: claude-opus-5-5-max
-hardest tasks: claude-opus-5-5-max
-how explorer: grok-4.7-xhigh-fast
-how explainer: claude-opus-5-5-max
-why investigators: grok-4.7-xhigh-fast
-why synthesizer: claude-opus-5-5-max
-reflect tooling: gpt-5.6-sol-max
-reflect judgment, divergent, synthesizer: claude-opus-5-5-max
-arena runners: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
-arena cross-judge pool: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
-swarm workers: grok-4.7-xhigh-fast
-architect runners: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
-interrogate reviewers: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
+# pstack model configuration. Consumers read this file explicitly.
+# `inherit-parent` or `auto` means: omit the subagent model parameter.
+# budget: medium (host-controlled)
+feature, refactoring: inherit-parent
+bug-fix: inherit-parent
+perf-issue: inherit-parent
+hillclimb: inherit-parent
+judgment and prose: inherit-parent
+hardest tasks: inherit-parent
+how explorer: inherit-parent
+how explainer: inherit-parent
+why investigators: inherit-parent
+why synthesizer: inherit-parent
+reflect tooling: inherit-parent
+reflect judgment, divergent, synthesizer: inherit-parent
+arena runners: inherit-parent
+arena cross-judge pool: inherit-parent
+swarm workers: inherit-parent
+architect runners: inherit-parent
+interrogate reviewers: inherit-parent
 ```
 
 ### 6. Confirm
 
-Tell the user the rule was written and that it applies to new sessions. Re-running this skill updates it.
+Tell the user the shared file was written. Explain that it is not loaded automatically by the host: each converted pstack Skill reads it when invoked. Do not claim a configured model is active until a consuming Skill successfully launches a subagent with that exact identifier. Re-running this Skill updates the file.
 
 ### 7. Offer a verification skill (optional)
 

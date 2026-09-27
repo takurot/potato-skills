@@ -8,13 +8,15 @@ license: MIT
 > Use the host's equivalent tool or subagent interface when the text names a Cursor-specific control.
 > Never claim that an unavailable hook, MCP server, named agent, or Cursor service ran.
 
+> Model configuration: Read `~/.codex/pstack-models.md` before choosing any model. The host does not load this file automatically. Use only the role lines in that file and only exact model identifiers accepted by the current host. For `auto` or `inherit-parent`, omit the subagent model parameter.
+
 # Why
 
 Investigate the motivation and intent behind code.
 
 Companion to the `how` skill. `how` answers what the code does and how it works. `why` answers what forces led to its shape.
 
-Each spawn below names a role line in the `pstack-models.mdc` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message.
+Each spawn below names a role line in the `~/.codex/pstack-models.md` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message.
 
 ## Operating Posture
 

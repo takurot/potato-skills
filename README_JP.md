@@ -91,6 +91,7 @@ Skill の文章やローカルスクリプトは移植できますが、Cursor �
 - MCP を使う Skills は、対応する MCP サーバーを Claude Code/Codex 側で別途設定する必要があります。
 - Cursor SDK や Cursor Cloud Agents を操作する Skill は、引き続き Cursor の認証情報とサービスを必要とします。
 - 固有名の subagent は自動登録しません。元の agent 定義を `references/cursor-agents/` に同梱しているので、利用可能な汎用 subagent へのプロンプトとして使います。
+- `setup-pstack` はホスト別の共有 Markdown ファイルを書き込みます。ホスト自体が設定として自動読込するのではなく、変換済みの pstack Skills が呼び出し時に明示的に読み、そのホストが受理したモデル識別子だけを使用します。
 
 各 Skill の先頭にも、利用ホストで存在しない機能を実行済みと扱わないための互換性注記があります。個別の制約は `skills/manifest.json` で確認できます。
 

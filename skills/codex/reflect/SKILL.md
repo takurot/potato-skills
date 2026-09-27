@@ -9,6 +9,8 @@ license: MIT
 > Never claim that an unavailable hook, MCP server, named agent, or Cursor service ran.
 > Cursor transcript paths are not portable; use only an equivalent transcript source exposed by the active host.
 
+> Model configuration: Read `~/.codex/pstack-models.md` before choosing any model. The host does not load this file automatically. Use only the role lines in that file and only exact model identifiers accepted by the current host. For `auto` or `inherit-parent`, omit the subagent model parameter.
+
 # Reflect
 
 Mine the current conversation for durable learnings, then route them into skill edits.
@@ -35,7 +37,7 @@ For each candidate, read the first JSONL line and check that `message.content[0]
 
 One message, three `Task` calls, `subagent_type: generalPurpose`, with `model` set as below, agent mode (`readonly: false`). Reviewers need MCP access for context lookups (tickets, chat threads, observability traces referenced in the transcript). Readonly strips MCPs.
 
-Each reviewer and the synthesizer name a role line in the `pstack-models.mdc` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message.
+Each reviewer and the synthesizer name a role line in the `~/.codex/pstack-models.md` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message.
 
 | Lens | Role line | Default `model` | Prompt template |
 |---|---|---|---|

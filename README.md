@@ -91,6 +91,7 @@ Skill instructions and local resources can be converted, but Cursor-specific run
 - Skills that use MCP require the corresponding MCP server to be configured separately in Claude Code or Codex.
 - Skills that operate the Cursor SDK or Cursor Cloud Agents still require Cursor credentials and services.
 - Named Cursor subagents are not registered automatically. Their original definitions are bundled under `references/cursor-agents/` for use as prompts with an available general-purpose subagent.
+- `setup-pstack` writes a shared per-host Markdown file. The host does not load it as configuration; converted pstack Skills read it explicitly when invoked and use only model identifiers accepted by that host.
 
 Each converted Skill also starts with a compatibility note that prevents unavailable host capabilities from being reported as executed. See `skills/manifest.json` for per-Skill constraints.
 

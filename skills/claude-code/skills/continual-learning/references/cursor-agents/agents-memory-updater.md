@@ -18,7 +18,7 @@ Use from `continual-learning` when transcript deltas may produce durable memory 
    - `## Learned User Preferences`
    - `## Learned Workspace Facts`
 2. Load the incremental index if present.
-3. Inspect only transcript files under `~/.cursor/projects/<workspace-slug>/agent-transcripts/` that are new or have newer mtimes than the index.
+3. Inspect transcript files only when the active host explicitly exposes a transcript source for the current workspace. Process only entries newer than the index. If no source is exposed, do not scan user or unrelated project directories; report that transcript mining is unavailable.
 4. Pull out only durable, reusable items:
    - recurring user preferences or corrections
    - stable workspace facts
@@ -43,5 +43,5 @@ Use from `continual-learning` when transcript deltas may produce durable memory 
 
 ## Output
 
-- Updated `AGENTS.md` and `.cursor/hooks/state/continual-learning-index.json` when needed
+- Updated `AGENTS.md` and `.claude/continual-learning/index.json` when needed
 - Otherwise exactly `No high-signal memory updates.`

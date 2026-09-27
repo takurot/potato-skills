@@ -594,15 +594,109 @@ def adapt_body(skill: SourceSkill, target: str) -> str:
     return "\n".join(preface) + "\n\n" + body.rstrip() + "\n"
 
 
-def copy_support_files(skill: SourceSkill, destination: Path) -> None:
+TEXT_RESOURCE_SUFFIXES = {
+    ".css",
+    ".html",
+    ".js",
+    ".json",
+    ".md",
+    ".mjs",
+    ".py",
+    ".sh",
+    ".toml",
+    ".ts",
+    ".txt",
+    ".yaml",
+    ".yml",
+}
+
+
+def adapt_support_text(text: str, target: str) -> str:
+    if target == "claude-code":
+        user_skills = "~/.claude/skills/"
+        project_skills = ".claude/skills/"
+        state_root = ".claude/"
+    else:
+        user_skills = "~/.codex/skills/"
+        project_skills = ".agents/skills/"
+        state_root = ".codex/"
+
+    protected = "__CURSOR_CANVAS_SKILLS_PATH__"
+    text = text.replace("~/.cursor/skills-cursor/", protected)
+    text = text.replace("~/.cursor/skills/", user_skills)
+    text = text.replace(".cursor/skills/", project_skills)
+    text = text.replace(protected, "~/.cursor/skills-cursor/")
+    text = text.replace(
+        f"(workspace `{project_skills}`, user-level `{user_skills}`, or "
+        "plugin-installed paths under `~/.cursor/plugins/`)",
+        f"(workspace `{project_skills}`, user-level `{user_skills}`, or another "
+        "host-installed Skill root explicitly exposed in the active session)",
+    )
+    text = text.replace(
+        "Inspect only transcript files under "
+        "`~/.cursor/projects/<workspace-slug>/agent-transcripts/` that are new or have newer "
+        "mtimes than the index.",
+        "Inspect transcript files only when the active host explicitly exposes a transcript "
+        "source for the current workspace. Process only entries newer than the index. If no "
+        "source is exposed, do not scan user or unrelated project directories; report that "
+        "transcript mining is unavailable.",
+    )
+    text = text.replace(
+        ".cursor/hooks/state/continual-learning-index.json",
+        f"{state_root}continual-learning/index.json",
+    )
+    text = text.replace(
+        "A local transcript under the active workspace's `agent-transcripts/` directory "
+        "(the system prompt names the path. Do not glob across "
+        "`~/.cursor/projects/*/`, that crosses workspace boundaries and reads private chats "
+        "from unrelated projects), a cloud-agent URL, or a pushed branch.",
+        "A local transcript only when the active host explicitly exposes it for the current "
+        "workspace, a cloud-agent URL, or a pushed branch. Never scan other project or user "
+        "session roots for transcripts.",
+    )
+    text = text.replace(
+        "Read each candidate's local transcript under the active workspace's "
+        "`agent-transcripts/` directory (the system prompt names this path). Do not glob "
+        "across `~/.cursor/projects/*/`. That crosses workspace boundaries and reads private "
+        "chats from unrelated projects.",
+        "Read each candidate transcript only when the active host explicitly exposes it for "
+        "the current workspace. Never scan other project or user session roots. If no "
+        "transcript is exposed, grade from the produced artifacts and state that chain-level "
+        "verification was unavailable.",
+    )
+    text = text.replace(
+        "# Transcripts dir: ~/.cursor/projects/<slugified-repo-path>/agent-transcripts.\n"
+        "slug=$(printf '%s' \"$main_wt\" | sed 's#^/##; s#/#-#g')\n"
+        'transcripts="$HOME/.cursor/projects/$slug/agent-transcripts"',
+        "# Optional, explicitly supplied transcript root for the active workspace only.\n"
+        "# Leave unset when the host does not expose workspace transcripts.\n"
+        'transcripts="${POTATO_TRANSCRIPTS_DIR:-}"',
+    )
+    return text
+
+
+def adapt_copied_resources(destination: Path, target: str) -> None:
+    for path in destination.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in TEXT_RESOURCE_SUFFIXES:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        adapted = adapt_support_text(text, target)
+        if adapted != text:
+            path.write_text(adapted, encoding="utf-8")
+
+
+def copy_support_files(skill: SourceSkill, destination: Path, target: str) -> None:
     for child in skill.source_file.parent.iterdir():
         if child.name == "SKILL.md":
             continue
-        target = destination / child.name
+        target_path = destination / child.name
         if child.is_dir():
-            shutil.copytree(child, target, symlinks=True)
+            shutil.copytree(child, target_path, symlinks=True)
         else:
-            shutil.copy2(child, target, follow_symlinks=False)
+            shutil.copy2(child, target_path, follow_symlinks=False)
 
     for agent_file in referenced_agent_files(skill):
         agent_destination = destination / "references" / "cursor-agents"
@@ -612,6 +706,7 @@ def copy_support_files(skill: SourceSkill, destination: Path) -> None:
     license_file = skill.plugin_root / "LICENSE"
     if license_file.is_file():
         shutil.copy2(license_file, destination / "LICENSE")
+    adapt_copied_resources(destination, target)
 
 
 def short_description(description: str) -> str:
@@ -625,7 +720,7 @@ def short_description(description: str) -> str:
 
 def write_skill(skill: SourceSkill, target: str, destination: Path) -> None:
     destination.mkdir(parents=True)
-    copy_support_files(skill, destination)
+    copy_support_files(skill, destination, target)
     description = skill.description
     if skill.name == "setup-pstack":
         description = description.replace(

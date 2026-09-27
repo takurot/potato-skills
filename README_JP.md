@@ -54,6 +54,9 @@ Claude Code は `<project>/.claude/skills/`、Codex は `<project>/.agents/skill
 ./install.sh --target codex --skill thermos --skill tdd
 ```
 
+`--skill` には空でない正確な Skill 名を1つ指定してください。複数選択する場合はオプションを
+繰り返し、全 Skill をインストールする場合だけ `--skill` を省略します。
+
 主なオプション:
 
 - `--dry-run` — 書き込まずに予定を表示

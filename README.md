@@ -53,6 +53,9 @@ You can also select individual Skills:
 ./install.sh --target codex --skill thermos --skill tdd
 ```
 
+Each `--skill` value must be a non-empty, exact Skill name. Repeat the option to
+select multiple Skills; omit it entirely to install all Skills.
+
 Main options:
 
 - `--dry-run` — Show planned operations without writing files

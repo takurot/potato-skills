@@ -5,7 +5,8 @@ SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 TARGET="both"
 SCOPE="user"
 PROJECT_DIR="$PWD"
-SELECTED=""
+SELECTED=()
+SELECTOR_PROVIDED=0
 FORCE=0
 DRY_RUN=0
 LIST_ONLY=0
@@ -52,7 +53,9 @@ while [ "$#" -gt 0 ]; do
       ;;
     --skill)
       [ "$#" -ge 2 ] || die "--skill requires a value"
-      SELECTED="${SELECTED}${SELECTED:+ }$2"
+      [ -n "$2" ] || die "--skill requires a non-empty value"
+      SELECTOR_PROVIDED=1
+      SELECTED+=("$2")
       shift 2
       ;;
     --force)
@@ -92,14 +95,16 @@ if [ "$SCOPE" = "project" ]; then
   PROJECT_DIR=$(CDPATH='' cd -- "$PROJECT_DIR" && pwd)
 fi
 
-for requested in $SELECTED; do
-  [ -d "$SCRIPT_DIR/skills/codex/$requested" ] || die "unknown skill: $requested"
-done
+if [ "$SELECTOR_PROVIDED" -eq 1 ]; then
+  for requested in "${SELECTED[@]}"; do
+    [ -d "$SCRIPT_DIR/skills/codex/$requested" ] || die "unknown skill: $requested"
+  done
+fi
 
 is_selected() {
   candidate=$1
-  [ -z "$SELECTED" ] && return 0
-  for requested in $SELECTED; do
+  [ "$SELECTOR_PROVIDED" -eq 0 ] && return 0
+  for requested in "${SELECTED[@]}"; do
     [ "$requested" = "$candidate" ] && return 0
   done
   return 1
@@ -190,7 +195,7 @@ install_platform() {
     printf 'installed %s: %s\n' "$platform" "$name"
   done
 
-  if [ -n "$SELECTED" ] && [ "$found" -eq 0 ]; then
+  if [ "$SELECTOR_PROVIDED" -eq 1 ] && [ "$found" -eq 0 ]; then
     die "none of the requested skills exist for $platform"
   fi
 }

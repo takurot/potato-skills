@@ -228,6 +228,126 @@ def referenced_agent_files(skill: SourceSkill) -> list[Path]:
     return matches
 
 
+def adapt_hookless_workflow(skill_name: str, body: str, host: str) -> str:
+    if skill_name == "ralph-loop":
+        body = body.replace(
+            "3. Confirm to the user that the Ralph loop is active, then begin working on the task.\n\n"
+            "4. The stop hook automatically intercepts each turn end and feeds the same prompt "
+            "back as a followup message. You will see it prefixed with `[Ralph loop iteration N.]`.",
+            "3. Tell the user: Automatic continuation is unavailable on "
+            f"{host}. The state file records a manual iteration; it does not activate a hook.\n\n"
+            "4. Work on the first iteration. For each later iteration, the user must invoke the "
+            "Skill again or the host must provide an independently verified continuation "
+            "mechanism. On manual re-invocation, read the state, increment `iteration`, enforce "
+            "`max_iterations`, and repeat the saved prompt.",
+        )
+        body = body.replace(
+            "Confirm the loop is active (prompt, iteration limit, promise if set), then start "
+            "working on the task immediately.",
+            "Report that a manual iteration was initialized (prompt, iteration limit, and "
+            "promise if set), state that automatic continuation is unavailable, then perform "
+            "the first iteration.",
+        )
+    elif skill_name == "cancel-ralph":
+        body = body.replace("an active Ralph loop", "saved manual Ralph state")
+        body = body.replace("an active ralph loop", "saved manual Ralph state")
+        body = body.replace("No active Ralph loop found.", "No saved manual Ralph state found.")
+        body = body.replace(
+            "Cancelled Ralph loop (was at iteration N).",
+            "Removed saved manual Ralph state (was at iteration N).",
+        )
+        body = body.replace(
+            "a message that no loop was active", "a message that no manual state was present"
+        )
+    elif skill_name == "ralph-loop-help":
+        body = body.replace(
+            "Each iteration:\n1. The agent receives the SAME prompt\n2. Works on the task, "
+            "modifying files\n3. Tries to exit\n4. Stop hook intercepts and feeds the same "
+            "prompt again\n5. The agent sees its previous work in the files\n6. Iteratively "
+            "improves until completion",
+            "In the original Cursor plugin, a stop hook repeats the prompt. On this host, "
+            "each later iteration requires the user to invoke the Skill again or a separately "
+            "verified host continuation mechanism. The saved state lets the agent read its "
+            "previous work and continue without claiming that a hook is active.",
+        )
+        body = body.replace(
+            "2. Agent works on the task\n3. Stop hook intercepts exit and feeds the same "
+            "prompt back\n4. Agent sees its previous work and iterates\n5. Continues until "
+            "promise detected or max iterations reached",
+            "2. Agent performs one manual iteration\n3. A later invocation reads the "
+            "saved prompt and increments the iteration\n4. The agent stops at the configured "
+            "maximum or when the completion promise is genuinely satisfied",
+        )
+        body = body.replace(
+            "The stop hook looks for this specific tag. Without it (or `--max-iterations`), "
+            "Ralph runs indefinitely.",
+            "On this host, the agent checks this tag during a manual iteration. No background "
+            "or indefinite loop is created by the state file.",
+        )
+    elif skill_name == "advisor":
+        body = body.replace(
+            "When that file exists with `\"enabled\": true`, advisor mode is on for this project.",
+            "When that file exists with `\"enabled\": true`, it records manual advisor "
+            "preferences for the current conversation; it does not install lifecycle hooks.",
+        )
+        body = body.replace(
+            "| `/advisor nudge on` / `off` | Toggle the end-of-turn reminder posted by the "
+            "plugin's stop hook (default on). |",
+            "| `/advisor nudge on` / `off` | Record a nudge preference only. Automatic "
+            "end-of-turn nudges are unavailable on this host. |",
+        )
+        body = body.replace(
+            "that re-binds the mode to this conversation, the hooks re-fill `conversation_id` "
+            "and `transcript_path`, and the next consult starts a fresh advisor instead of "
+            "resuming another chat's.",
+            "that re-binds the manual preferences to this conversation. Leave "
+            "`conversation_id` and `transcript_path` null unless the active host explicitly "
+            "provides safe current-conversation values. The next consult starts a fresh advisor "
+            "instead of resuming another chat's.",
+        )
+        body = body.replace(
+            "The plugin's hooks fill in `conversation_id`, `transcript_path`, `consults`, and "
+            "`last_consult_at`. Leave them alone.",
+            "Automatic checkpoint and end-of-turn nudge hooks are unavailable. Keep "
+            "`conversation_id` and `transcript_path` null unless the active host exposes them "
+            "for this conversation. Update `consults` and `last_consult_at` manually only after "
+            "a successful consult.",
+        )
+        body = body.replace(
+            "Confirm in one line: `Advisor on: <slug>. I'll consult it before major decisions, "
+            "when I'm stuck, and before I call the task done.` Then continue with any task in "
+            "the same message.",
+            "Confirm in one line: `Advisor preferences saved: <slug>. Automatic checkpoints "
+            "and nudges are unavailable; I will consult only when explicitly invoked in this "
+            "conversation.` Then continue with any task in the same message.",
+        )
+        body = body.replace(
+            "Keep the advisor's full response out of the chat unless the user asks; the hooks "
+            "also append it to `.cursor/advisor/log.md`.",
+            "Keep the advisor's full response out of the chat unless the user asks. If a log is "
+            "required, append it explicitly and report that write; no hook records it.",
+        )
+        body = body.replace(
+            "Keep the advisor's full response out of the chat unless the user asks; the hooks "
+            "also append it to",
+            "Keep the advisor's full response out of the chat unless the user asks. If a log "
+            "is required, append it explicitly and report that write; no hook records it at",
+        )
+        start = body.find("## End-of-turn nudge")
+        end = body.find("## Disabling", start)
+        if start != -1 and end != -1:
+            body = (
+                body[:start]
+                + "## End-of-turn nudge\n\n"
+                + "Automatic checkpoint and end-of-turn nudge hooks are unavailable on this "
+                + "host. Do not promise or wait for a follow-up message. The user must invoke "
+                + "`/advisor ask ...` explicitly for each consult. The `nudge` field is only a "
+                + "saved preference for a future verified host integration.\n\n"
+                + body[end:]
+            )
+    return body
+
+
 def adapt_body(skill: SourceSkill, target: str) -> str:
     if target == "claude-code":
         user_skills = "~/.claude/skills/"
@@ -304,6 +424,7 @@ def adapt_body(skill: SourceSkill, target: str) -> str:
         "scan other project or user-session roots. If it is unavailable, audit the run from "
         "the current conversation and decision log.",
     )
+    body = adapt_hookless_workflow(skill.name, body, host)
 
     notes = compatibility_notes(skill)
     preface = [

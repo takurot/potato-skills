@@ -44,9 +44,9 @@ The user wants to start a Ralph loop. An iterative development loop where the sa
    Build a REST API for todos with CRUD operations, input validation, and tests.
    ```
 
-3. Confirm to the user that the Ralph loop is active, then begin working on the task.
+3. Tell the user: Automatic continuation is unavailable on Codex. The state file records a manual iteration; it does not activate a hook.
 
-4. The stop hook automatically intercepts each turn end and feeds the same prompt back as a followup message. You will see it prefixed with `[Ralph loop iteration N.]`.
+4. Work on the first iteration. For each later iteration, the user must invoke the Skill again or the host must provide an independently verified continuation mechanism. On manual re-invocation, read the state, increment `iteration`, enforce `max_iterations`, and repeat the saved prompt.
 
 ## Guardrails
 
@@ -57,4 +57,4 @@ The user wants to start a Ralph loop. An iterative development loop where the sa
 
 ## Output
 
-Confirm the loop is active (prompt, iteration limit, promise if set), then start working on the task immediately.
+Report that a manual iteration was initialized (prompt, iteration limit, and promise if set), state that automatic continuation is unavailable, then perform the first iteration.

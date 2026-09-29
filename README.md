@@ -2,7 +2,7 @@
 
 [日本語](README_JP.md)
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-09-29
 
 A distribution of Skills from the official [`cursor/plugins`](https://github.com/cursor/plugins) collection, converted into formats that Claude Code and Codex can load.
 
@@ -12,7 +12,7 @@ A distribution of Skills from the official [`cursor/plugins`](https://github.com
 - `skills/codex/` — Skills for Codex, including `agents/openai.yaml`
 - `install.sh` — Installer for user-level or project-level installation
 - `scripts/build_skills.py` — Conversion script that regenerates the distributions from `ref/plugins`
-- `skills/manifest.json` — Manifest recording source paths, versions, and compatibility notes
+- `skills/manifest.json` — Manifest recording source paths, licenses, versions, compatibility notes, and generated-file checksums
 
 Only Skills declared by each Cursor plugin's `plugin.json` are converted. Plugins that contain only MCP configuration are not converted because they are not Skills. Two duplicate Skill pairs are consolidated by selecting either the more self-contained copy or the copy from the canonical plugin. The current source revision generates 91 Skills for each host.
 
@@ -91,7 +91,11 @@ Claude Code and Codex use different Skill frontmatter formats, so this repositor
 | Cursor-specific agent definitions | Bundled under `references/cursor-agents/` | Bundled under `references/cursor-agents/` |
 | References to `.cursor/skills/` | Converted to `.claude/skills/` | Converted to `.agents/skills/` or `~/.codex/skills/` |
 
-Names are normalized to lowercase kebab-case. Invalid YAML frontmatter from the source is rewritten as valid YAML.
+Names are normalized to lowercase kebab-case. The converter parses frontmatter with
+PyYAML, rejects duplicate or unknown fields and invalid values, and emits valid YAML.
+The known legacy form of an unquoted plain `description` containing a colon is
+normalized explicitly. Support trees reject symlinks, secrets, caches, and dependency
+directories. A declared MIT license and a matching upstream `LICENSE` file are required.
 
 ## Compatibility boundaries
 
@@ -112,10 +116,18 @@ Fetch or update the source plugins, then run the builder:
 
 ```bash
 git clone https://github.com/cursor/plugins.git ref/plugins
+python3 -m pip install --requirement requirements.txt
 python3 scripts/build_skills.py
+python3 scripts/validate_generated.py skills
 ```
 
 The `ref/` directory is not included in this repository. If `ref/plugins` already exists, update that repository before converting. The builder discovers only the `skills` directories declared by `plugin.json` and deterministically regenerates `skills/`.
+
+The manifest and its sidecar checksum protect the generated tree. A normal rebuild
+refuses modified, added, or missing generated files. Review and preserve local work;
+use `--force` only when intentionally replacing a recognized generated tree. Output
+activation uses a rollback-safe rename. CI rebuilds both host distributions from the
+pinned upstream revision and compares them with the committed tree.
 
 ## License
 

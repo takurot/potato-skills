@@ -4,19 +4,35 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
 import subprocess
 import tempfile
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = ROOT / "ref" / "plugins"
 DEFAULT_OUTPUT = ROOT / "skills"
 ALLOWED_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SUPPORTED_FRONTMATTER_FIELDS = {
+    "name",
+    "description",
+    "disable-model-invocation",
+    "icon",
+    "color",
+    "mode",
+    "reminder",
+    "paths",
+    "model",
+    "readonly",
+    "is_background",
+}
 
 # These duplicate skills are either identical or have a more self-contained copy.
 PREFERRED_DUPLICATES = {
@@ -89,6 +105,8 @@ class SourceSkill:
     plugin_root: Path
     plugin_name: str
     plugin_version: str
+    license_id: str
+    license_file: Path
     body: str
     has_agents: bool
     has_hooks: bool
@@ -105,41 +123,61 @@ def split_frontmatter(text: str, path: Path) -> tuple[list[str], str]:
     raise ValueError(f"{path}: unterminated YAML frontmatter")
 
 
-def frontmatter_fields(lines: list[str]) -> dict[str, str]:
-    fields: dict[str, str] = {}
-    index = 0
-    while index < len(lines):
-        line = lines[index].rstrip("\r\n")
-        match = re.match(r"^([A-Za-z0-9_-]+):(?:\s*(.*))?$", line)
-        if not match:
-            index += 1
-            continue
-        key, value = match.group(1), match.group(2) or ""
-        if value in {">", ">-", "|", "|-"}:
-            block: list[str] = []
-            index += 1
-            while index < len(lines):
-                nested = lines[index].rstrip("\r\n")
-                if nested and not nested[0].isspace():
-                    break
-                block.append(nested.strip())
-                index += 1
-            fields[key] = (" " if value.startswith(">") else "\n").join(block).strip()
-            continue
-        fields[key] = unquote_scalar(value.strip())
-        index += 1
-    return fields
+class StrictSafeLoader(yaml.SafeLoader):
+    pass
 
 
-def unquote_scalar(value: str) -> str:
-    if len(value) >= 2 and value[0] == value[-1] == '"':
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            return value[1:-1]
-    if len(value) >= 2 and value[0] == value[-1] == "'":
-        return value[1:-1].replace("''", "'")
-    return value
+def construct_unique_mapping(
+    loader: StrictSafeLoader, node: yaml.MappingNode, deep: bool = False
+) -> dict[object, object]:
+    mapping: dict[object, object] = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise ValueError(f"duplicate frontmatter field: {key}")
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+StrictSafeLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_unique_mapping
+)
+
+
+def frontmatter_fields(lines: list[str], path: Path) -> dict[str, object]:
+    normalized_lines: list[str] = []
+    for line in lines:
+        stripped = line.rstrip("\r\n")
+        if stripped.startswith("description: "):
+            value = stripped.removeprefix("description: ")
+            if ": " in value and not value.startswith(('"', "'", ">", "|")):
+                line_ending = "\n" if line.endswith("\n") else ""
+                line = f"description: {json.dumps(value, ensure_ascii=False)}{line_ending}"
+        normalized_lines.append(line)
+    try:
+        loaded = yaml.load("".join(normalized_lines), Loader=StrictSafeLoader)
+    except ValueError:
+        raise
+    except yaml.YAMLError as error:
+        raise ValueError(f"{path}: invalid YAML frontmatter: {error}") from error
+    if not isinstance(loaded, dict):
+        raise ValueError(f"{path}: YAML frontmatter must be a mapping")
+    if not all(isinstance(key, str) for key in loaded):
+        raise ValueError(f"{path}: frontmatter fields must be strings")
+    unknown = sorted(set(loaded) - SUPPORTED_FRONTMATTER_FIELDS)
+    if unknown:
+        raise ValueError(
+            f"{path}: unsupported frontmatter field: {', '.join(unknown)}"
+        )
+    return loaded
+
+
+def frontmatter_bool(value: object, field: str, path: Path) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and not isinstance(value, bool) and value in {0, 1}:
+        return bool(value)
+    raise ValueError(f"{path}: {field} must be a YAML boolean or 0/1")
 
 
 def find_plugin_root(skill_file: Path, source: Path) -> Path:
@@ -154,15 +192,53 @@ def find_plugin_root(skill_file: Path, source: Path) -> Path:
 def declared_skill_files(source: Path) -> list[Path]:
     files: list[Path] = []
     for manifest_file in sorted(source.rglob(".cursor-plugin/plugin.json")):
+        if manifest_file.is_symlink():
+            raise ValueError(f"{manifest_file}: symlink plugin manifests are not allowed")
         manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
         relative = manifest.get("skills")
         if not relative:
             continue
-        skill_root = (manifest_file.parent.parent / relative).resolve()
+        if not isinstance(relative, str):
+            raise ValueError(f"{manifest_file}: skills must be a relative path string")
+        plugin_root = manifest_file.parent.parent.resolve()
+        declared_root = plugin_root / relative
+        if declared_root.is_symlink():
+            raise ValueError(f"{manifest_file}: symlink skills directories are not allowed")
+        skill_root = declared_root.resolve()
+        try:
+            skill_root.relative_to(plugin_root)
+        except ValueError as error:
+            raise ValueError(
+                f"{manifest_file}: declared skills directory escapes plugin root"
+            ) from error
         if not skill_root.is_dir():
             raise ValueError(f"{manifest_file}: declared skills directory does not exist")
-        files.extend(sorted(skill_root.rglob("SKILL.md")))
+        declared_files = sorted(skill_root.rglob("SKILL.md"))
+        for skill_file in declared_files:
+            if skill_file.is_symlink():
+                raise ValueError(f"{skill_file}: symlink Skill files are not allowed")
+        files.extend(declared_files)
     return files
+
+
+def verified_license(plugin_root: Path, manifest: dict[str, object]) -> tuple[str, Path]:
+    license_id = manifest.get("license")
+    if license_id != "MIT":
+        raise ValueError(
+            f"{plugin_root}: unsupported license {license_id!r}; only verified MIT content is distributable"
+        )
+    license_file = plugin_root / "LICENSE"
+    if not license_file.is_file() or license_file.is_symlink():
+        raise ValueError(f"{plugin_root}: missing LICENSE file for declared MIT license")
+    license_text = license_file.read_text(encoding="utf-8")
+    required_markers = (
+        "MIT License",
+        "Permission is hereby granted, free of charge",
+        'THE SOFTWARE IS PROVIDED "AS IS"',
+    )
+    if not all(marker in license_text for marker in required_markers):
+        raise ValueError(f"{license_file}: incompatible with declared MIT license")
+    return license_id, license_file
 
 
 def normalized_name(raw_name: str, skill_file: Path) -> str:
@@ -190,29 +266,40 @@ def normalized_description(description: str) -> str:
 
 
 def load_skills(source: Path) -> list[SourceSkill]:
+    source = source.resolve()
     candidates: list[SourceSkill] = []
     for skill_file in declared_skill_files(source):
         frontmatter, body = split_frontmatter(skill_file.read_text(encoding="utf-8"), skill_file)
-        fields = frontmatter_fields(frontmatter)
+        fields = frontmatter_fields(frontmatter, skill_file)
         plugin_root = find_plugin_root(skill_file, source)
         manifest = json.loads(
             (plugin_root / ".cursor-plugin" / "plugin.json").read_text(encoding="utf-8")
         )
+        license_id, license_file = verified_license(plugin_root, manifest)
         raw_name = fields.get("name", skill_file.parent.name)
-        description = fields.get("description", "").strip()
+        if not isinstance(raw_name, str):
+            raise ValueError(f"{skill_file}: name must be a string")
+        raw_description = fields.get("description", "")
+        if not isinstance(raw_description, str):
+            raise ValueError(f"{skill_file}: description must be a string")
+        description = raw_description.strip()
         if not description:
             raise ValueError(f"{skill_file}: missing description")
         description = normalized_description(description)
+        explicit_value = fields.get("disable-model-invocation", False)
         candidates.append(
             SourceSkill(
                 name=normalized_name(raw_name, skill_file),
                 description=description,
-                explicit_only=fields.get("disable-model-invocation", "false").lower()
-                == "true",
+                explicit_only=frontmatter_bool(
+                    explicit_value, "disable-model-invocation", skill_file
+                ),
                 source_file=skill_file,
                 plugin_root=plugin_root,
                 plugin_name=manifest["name"],
                 plugin_version=manifest.get("version", "unknown"),
+                license_id=license_id,
+                license_file=license_file,
                 body=body,
                 has_agents="agents" in manifest,
                 has_hooks="hooks" in manifest,
@@ -272,14 +359,21 @@ def referenced_agent_files(skill: SourceSkill) -> list[Path]:
     agent_dir = skill.plugin_root / "agents"
     if not agent_dir.is_dir():
         return []
+    if agent_dir.is_symlink():
+        raise ValueError(f"{agent_dir}: symlink agent directories are not allowed")
     body = skill.body.lower()
     matches: list[Path] = []
     for agent_file in sorted(agent_dir.glob("*.md")):
+        if agent_file.is_symlink():
+            raise ValueError(f"{agent_file}: symlink agent files are not allowed")
         frontmatter, _ = split_frontmatter(
             agent_file.read_text(encoding="utf-8"), agent_file
         )
-        fields = frontmatter_fields(frontmatter)
-        names = {agent_file.stem.lower(), fields.get("name", "").lower()}
+        fields = frontmatter_fields(frontmatter, agent_file)
+        parsed_name = fields.get("name", "")
+        if not isinstance(parsed_name, str):
+            raise ValueError(f"{agent_file}: name must be a string")
+        names = {agent_file.stem.lower(), parsed_name.lower()}
         if any(name and name in body for name in names):
             matches.append(agent_file)
     return matches
@@ -720,6 +814,44 @@ TEXT_RESOURCE_SUFFIXES = {
     ".yml",
 }
 
+FORBIDDEN_SUPPORT_DIRECTORIES = {
+    ".cache",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".svn",
+    "__pycache__",
+    "node_modules",
+    "vendor",
+}
+FORBIDDEN_SECRET_SUFFIXES = {".key", ".p12", ".pem", ".pfx"}
+FORBIDDEN_SECRET_NAMES = {
+    "credentials.json",
+    "id_ed25519",
+    "id_rsa",
+    "secrets.json",
+}
+
+
+def validate_support_tree(skill: SourceSkill) -> None:
+    support_root = skill.source_file.parent
+    for path in support_root.rglob("*"):
+        relative = path.relative_to(support_root)
+        if path.is_symlink():
+            raise ValueError(f"{path}: symlink support paths are not allowed")
+        if any(part in FORBIDDEN_SUPPORT_DIRECTORIES for part in relative.parts):
+            raise ValueError(f"{path}: forbidden support path")
+        name = path.name.lower()
+        if (
+            name == ".env"
+            or name.startswith(".env.")
+            or name in FORBIDDEN_SECRET_NAMES
+        ):
+            raise ValueError(f"{path}: forbidden support path")
+        if path.is_file() and path.suffix.lower() in FORBIDDEN_SECRET_SUFFIXES:
+            raise ValueError(f"{path}: forbidden support path")
+
 
 def adapt_support_text(text: str, target: str) -> str:
     if target == "claude-code":
@@ -799,23 +931,22 @@ def adapt_copied_resources(destination: Path, target: str) -> None:
 
 
 def copy_support_files(skill: SourceSkill, destination: Path, target: str) -> None:
+    validate_support_tree(skill)
     for child in skill.source_file.parent.iterdir():
         if child.name == "SKILL.md":
             continue
         target_path = destination / child.name
         if child.is_dir():
-            shutil.copytree(child, target_path, symlinks=True)
+            shutil.copytree(child, target_path)
         else:
-            shutil.copy2(child, target_path, follow_symlinks=False)
+            shutil.copy2(child, target_path)
 
     for agent_file in referenced_agent_files(skill):
         agent_destination = destination / "references" / "cursor-agents"
         agent_destination.mkdir(parents=True, exist_ok=True)
         shutil.copy2(agent_file, agent_destination / agent_file.name)
 
-    license_file = skill.plugin_root / "LICENSE"
-    if license_file.is_file():
-        shutil.copy2(license_file, destination / "LICENSE")
+    shutil.copy2(skill.license_file, destination / "LICENSE")
     adapt_copied_resources(destination, target)
 
 
@@ -853,7 +984,7 @@ def write_skill(skill: SourceSkill, target: str, destination: Path) -> None:
         f"description: {yaml_string(description)}",
     ]
     if target == "codex":
-        frontmatter.append("license: MIT")
+        frontmatter.append(f"license: {skill.license_id}")
     if target == "claude-code" and skill.explicit_only:
         frontmatter.append("disable-model-invocation: true")
     frontmatter.append("---")
@@ -886,7 +1017,91 @@ def source_revision(source: Path) -> str | None:
     return result.stdout.strip()
 
 
-def assert_safe_output(output: Path, source: Path) -> None:
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def generated_file_hashes(output: Path) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    for path in sorted(output.rglob("*")):
+        if path.is_symlink():
+            raise ValueError(f"generated output contains a symlink: {path}")
+        if not path.is_file() or path in {
+            output / "manifest.json",
+            output / "manifest.sha256",
+        }:
+            continue
+        hashes[path.relative_to(output).as_posix()] = sha256_file(path)
+    return hashes
+
+
+def read_generated_manifest(output: Path) -> dict[str, object]:
+    manifest_file = output / "manifest.json"
+    try:
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"unrecognized generated output: {output}") from error
+    if not isinstance(manifest, dict) or manifest.get("source") != (
+        "https://github.com/cursor/plugins"
+    ):
+        raise ValueError(f"unrecognized generated output: {output}")
+    return manifest
+
+
+def verify_generated_output(output: Path) -> None:
+    manifest = read_generated_manifest(output)
+    checksum_file = output / "manifest.sha256"
+    try:
+        recorded_manifest_hash = checksum_file.read_text(encoding="utf-8").strip()
+    except OSError as error:
+        raise ValueError(f"{output}: missing manifest checksum") from error
+    if recorded_manifest_hash != sha256_file(output / "manifest.json"):
+        raise ValueError(f"{output}: manifest checksum mismatch")
+    expected_hashes = manifest.get("files")
+    if not isinstance(expected_hashes, dict) or not all(
+        isinstance(path, str) and isinstance(digest, str)
+        for path, digest in expected_hashes.items()
+    ):
+        raise ValueError(f"{output}: manifest is missing generated file checksums")
+    actual_hashes = generated_file_hashes(output)
+    if actual_hashes != expected_hashes:
+        missing = sorted(set(expected_hashes) - set(actual_hashes))
+        added = sorted(set(actual_hashes) - set(expected_hashes))
+        changed = sorted(
+            path
+            for path in set(expected_hashes) & set(actual_hashes)
+            if expected_hashes[path] != actual_hashes[path]
+        )
+        details = f"missing={missing}, added={added}, changed={changed}"
+        raise ValueError(f"{output}: generated file checksum mismatch ({details})")
+
+    entries = manifest.get("skills")
+    if not isinstance(entries, list) or manifest.get("skill_count") != len(entries):
+        raise ValueError(f"{output}: invalid skill inventory")
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
+            raise ValueError(f"{output}: invalid skill manifest entry")
+        name = entry["name"]
+        if entry.get("license") != "MIT":
+            raise ValueError(f"{output}: unverified license for {name}")
+        claude_root = output / "claude-code" / "skills" / name
+        codex_root = output / "codex" / name
+        required = (
+            claude_root / "SKILL.md",
+            claude_root / "LICENSE",
+            codex_root / "SKILL.md",
+            codex_root / "LICENSE",
+            codex_root / "agents" / "openai.yaml",
+        )
+        if not all(path.is_file() for path in required):
+            raise ValueError(f"{output}: incomplete generated files for {name}")
+
+
+def assert_safe_output(output: Path, source: Path, force: bool) -> None:
     protected = {Path("/"), Path.home().resolve(), ROOT.resolve(), ROOT.parent.resolve()}
     if output in protected:
         raise ValueError(f"refusing unsafe output directory: {output}")
@@ -894,75 +1109,105 @@ def assert_safe_output(output: Path, source: Path) -> None:
         raise ValueError("output and source directories must not contain one another")
     if not output.exists():
         return
-    manifest_file = output / "manifest.json"
     try:
-        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        raise ValueError(
-            f"refusing to replace unrecognized output directory: {output}"
-        ) from error
-    if manifest.get("source") != "https://github.com/cursor/plugins":
+        read_generated_manifest(output)
+    except ValueError:
         raise ValueError(f"refusing to replace unrecognized output directory: {output}")
+    if force:
+        return
+    try:
+        verify_generated_output(output)
+    except ValueError as error:
+        raise ValueError(
+            f"refusing to replace locally modified generated output: {error}; use --force"
+        ) from error
 
 
-def build(source: Path, output: Path) -> None:
+def activate_generated_output(temporary: Path, output: Path) -> None:
+    backup: Path | None = None
+    try:
+        if output.exists():
+            backup = output.parent / f".{output.name}.backup.{uuid.uuid4().hex}"
+            output.rename(backup)
+        temporary.rename(output)
+    except BaseException:
+        if backup is not None and backup.exists() and not output.exists():
+            backup.rename(output)
+        raise
+    if backup is not None:
+        shutil.rmtree(backup)
+
+
+def build(source: Path, output: Path, force: bool = False) -> None:
+    source = source.resolve()
+    if output.is_symlink():
+        raise ValueError(f"refusing symlink output directory: {output}")
+    output = output.resolve()
     if not source.is_dir():
         raise ValueError(f"source directory does not exist: {source}")
-    assert_safe_output(output, source)
+    assert_safe_output(output, source, force)
     output.parent.mkdir(parents=True, exist_ok=True)
     skills = load_skills(source)
     temporary = Path(tempfile.mkdtemp(prefix=f".{output.name}.", dir=output.parent))
+    try:
+        manifest_skills: list[dict[str, object]] = []
+        for skill in skills:
+            for target in ("claude-code", "codex"):
+                destination_root = temporary / target
+                if target == "claude-code":
+                    destination_root /= "skills"
+                write_skill(skill, target, destination_root / skill.name)
+            manifest_skills.append(
+                {
+                    "name": skill.name,
+                    "plugin": skill.plugin_name,
+                    "plugin_version": skill.plugin_version,
+                    "source": str(skill.source_file.relative_to(source)),
+                    "license": skill.license_id,
+                    "explicit_only": skill.explicit_only,
+                    "experimental": skill.name in EXPERIMENTAL_SKILLS,
+                    "default_install": skill.name not in EXPERIMENTAL_SKILLS,
+                    "compatibility_notes": compatibility_notes(skill),
+                }
+            )
 
-    manifest_skills: list[dict[str, object]] = []
-    for skill in skills:
-        for target in ("claude-code", "codex"):
-            destination_root = temporary / target
-            if target == "claude-code":
-                destination_root /= "skills"
-            write_skill(skill, target, destination_root / skill.name)
-        manifest_skills.append(
-            {
-                "name": skill.name,
-                "plugin": skill.plugin_name,
-                "plugin_version": skill.plugin_version,
-                "source": str(skill.source_file.relative_to(source)),
-                "explicit_only": skill.explicit_only,
-                "experimental": skill.name in EXPERIMENTAL_SKILLS,
-                "default_install": skill.name not in EXPERIMENTAL_SKILLS,
-                "compatibility_notes": compatibility_notes(skill),
-            }
+        claude_manifest_dir = temporary / "claude-code" / ".claude-plugin"
+        claude_manifest_dir.mkdir(parents=True)
+        (claude_manifest_dir / "plugin.json").write_text(
+            json.dumps(
+                {
+                    "name": "potato-skills",
+                    "version": "1.0.0",
+                    "description": "Cursor plugin skills converted for Claude Code.",
+                    "author": {"name": "potato-skills contributors"},
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
         )
 
-    manifest = {
-        "schema_version": 1,
-        "generator": "scripts/build_skills.py",
-        "source": "https://github.com/cursor/plugins",
-        "source_revision": source_revision(source),
-        "skill_count": len(skills),
-        "skills": manifest_skills,
-    }
-    (temporary / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    claude_manifest_dir = temporary / "claude-code" / ".claude-plugin"
-    claude_manifest_dir.mkdir(parents=True)
-    (claude_manifest_dir / "plugin.json").write_text(
-        json.dumps(
-            {
-                "name": "potato-skills",
-                "version": "1.0.0",
-                "description": "Cursor plugin skills converted for Claude Code.",
-                "author": {"name": "potato-skills contributors"},
-            },
-            indent=2,
+        manifest = {
+            "schema_version": 2,
+            "generator": "scripts/build_skills.py",
+            "source": "https://github.com/cursor/plugins",
+            "source_revision": source_revision(source),
+            "skill_count": len(skills),
+            "skills": manifest_skills,
+            "files": generated_file_hashes(temporary),
+        }
+        (temporary / "manifest.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
         )
-        + "\n",
-        encoding="utf-8",
-    )
-
-    if output.exists():
-        shutil.rmtree(output)
-    temporary.rename(output)
+        (temporary / "manifest.sha256").write_text(
+            sha256_file(temporary / "manifest.json") + "\n", encoding="utf-8"
+        )
+        verify_generated_output(temporary)
+        activate_generated_output(temporary, output)
+    finally:
+        if temporary.exists():
+            shutil.rmtree(temporary)
     print(f"Built {len(skills)} skills for Claude Code and Codex in {output}")
 
 
@@ -970,9 +1215,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="replace recognized generated output even when checksums do not match",
+    )
     args = parser.parse_args()
     try:
-        build(args.source.resolve(), args.output.resolve())
+        build(args.source, args.output, force=args.force)
     except ValueError as error:
         parser.error(str(error))
 

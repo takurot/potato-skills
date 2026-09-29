@@ -57,6 +57,11 @@ Claude Code は `<project>/.claude/skills/`、Codex は `<project>/.agents/skill
 `--skill` には空でない正確な Skill 名を1つ指定してください。複数選択する場合はオプションを
 繰り返し、全 Skill をインストールする場合だけ `--skill` を省略します。
 
+既定セットは、現在production-readyな90個のSkillをインストールします。`docs-canvas` は
+`--list` には表示されますが、変換元のワークフローがplaceholderのため既定対象から除外します。
+ホスト別fallbackと同梱スモーク成果物を評価する場合だけ `--skill docs-canvas` で明示的に選択してください。
+インストーラはexperimental警告を表示します。
+
 主なオプション:
 
 - `--dry-run` — 書き込まずに予定を表示

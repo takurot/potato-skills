@@ -8,6 +8,8 @@ license: MIT
 > Use the host's equivalent tool or subagent interface when the text names a Cursor-specific control.
 > Never claim that an unavailable hook, MCP server, named agent, or Cursor service ran.
 
+> Model configuration: Read `~/.codex/pstack-models.md` before choosing any model. The host does not load this file automatically. Use only the role lines in that file and only exact model identifiers accepted by the current host. For `auto` or `inherit-parent`, omit the subagent model parameter.
+
 # Swarm
 
 Fan out N parallel cloud workers. They may cover separate slices, race the same brief, or mix both. The parent waits, aggregates, and returns one report.

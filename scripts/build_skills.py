@@ -376,6 +376,134 @@ def adapt_pr_review_canvas(skill_name: str, body: str) -> str:
     return body
 
 
+PSTACK_CONFIG_CONSUMERS = {
+    "architect",
+    "arena",
+    "how",
+    "interrogate",
+    "reflect",
+    "swarm",
+    "why",
+}
+
+
+def adapt_pstack_config(skill_name: str, body: str, models_file: str) -> str:
+    body = body.replace("pstack-models.mdc", models_file)
+    if skill_name in PSTACK_CONFIG_CONSUMERS:
+        body = (
+            f"> Model configuration: Read `{models_file}` before choosing any model. The host "
+            "does not load this file automatically. Use only the role lines in that file and "
+            "only exact model identifiers accepted by the current host. For `auto` or "
+            "`inherit-parent`, omit the subagent model parameter.\n\n"
+            + body
+        )
+    if skill_name != "setup-pstack":
+        return body
+
+    body = body.replace(
+        f"Write `{models_file}`, an always-applied rule that sets pstack's model per role.",
+        f"Write `{models_file}`, a shared configuration file that each converted pstack Skill "
+        "reads explicitly. It is not loaded automatically by the host.",
+    )
+    body = body.replace(
+        "Enumerate the model slugs you can pass to a `Task` subagent in this session. That is "
+        "the dependable source. If Cursor also exposes a models API or CLI that lists the "
+        "user's entitled models, prefer it for completeness. If you cannot detect any, ask "
+        "the user to paste the slugs they have access to. Never write a real slug you have "
+        "not confirmed is available. The aliases `inherit-parent` and `auto` are always valid "
+        "even though they are not detected slugs.",
+        "Use the current host's subagent interface or its validation error to obtain model "
+        "identifiers it actually accepts in this session. Do not use a Cursor model API for "
+        "Claude Code or Codex. If the host cannot enumerate models without running a paid "
+        "call, ask the user to select from identifiers already accepted in this session, or "
+        "use `inherit-parent`. Never write an unverified real identifier. The aliases "
+        "`inherit-parent` and `auto` mean to omit the subagent model parameter.",
+    )
+    body = body.replace(
+        "**(b) Apply it.** Build the working table from the skill defaults, and on a re-run "
+        "keep any role you changed by family, list, or alias (`inherit-parent`, `auto`). "
+        "`unlimited` leaves every effort as in that table. `large`, `medium`, and `small` set "
+        "the effort token of every real slug, panel entries included, to `xhigh`, `high`, or "
+        "`medium`. The effort token is the last token, or the one before a trailing `fast`, on "
+        "the ladder `max` > `xhigh` > `high` > `medium` > `low`. If the result is not a "
+        "detected slug, use the same family's detected slug with the highest effort at or "
+        "below the target, else mark the role as needing a choice. `inherit-parent` and `auto` "
+        "do not change. So `small` turns `claude-opus-5-5-max` into "
+        "`claude-opus-5-5-medium`, and `grok-4.7-xhigh-fast` into "
+        "`grok-4.7-medium-fast`.",
+        "**(b) Apply it.** Treat the budget as a selection preference, not as syntax inside a "
+        "model name. Choose only exact identifiers accepted by the current host. If the host "
+        "exposes reasoning effort separately, set it through that interface. If it exposes "
+        "distinct model identifiers for effort tiers, choose only an identifier present in "
+        "the accepted set. Do not construct a model identifier by editing a suffix. When no "
+        "accepted identifier satisfies the requested budget, mark the role as needing a "
+        "choice or use `inherit-parent` after confirmation.",
+    )
+    body = body.replace(
+        f"Write `{models_file}` with `alwaysApply: true`, a `# budget` line with the chosen "
+        "label and its target effort, and one line per role, using the same labels poteto-mode "
+        "uses. Overwrite the whole file so re-runs stay idempotent. Shape:",
+        f"Write `{models_file}` as plain Markdown with a `# budget` comment and one line per "
+        "role. This file is not host configuration; converted pstack consumers read it "
+        "explicitly. Overwrite the whole file so re-runs stay idempotent. Use only exact "
+        "identifiers accepted by the current host. Shape:",
+    )
+    old_shape = """---
+description: pstack per-role model choices (overrides skill defaults)
+alwaysApply: true
+---
+# pstack model configuration. One line per role. Delete a line to fall back to the skill default.
+# `inherit-parent` or `auto` as a value: the role runs on the parent chat model (omit Task `model`). Alias entries in a panel list still count toward its fan-out.
+# budget: unlimited (max)
+feature, refactoring: grok-4.7-xhigh-fast
+bug-fix: grok-4.7-xhigh-fast
+perf-issue: grok-4.7-xhigh-fast
+hillclimb: grok-4.7-xhigh-fast
+judgment and prose: claude-opus-5-5-max
+hardest tasks: claude-opus-5-5-max
+how explorer: grok-4.7-xhigh-fast
+how explainer: claude-opus-5-5-max
+why investigators: grok-4.7-xhigh-fast
+why synthesizer: claude-opus-5-5-max
+reflect tooling: gpt-5.6-sol-max
+reflect judgment, divergent, synthesizer: claude-opus-5-5-max
+arena runners: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
+arena cross-judge pool: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
+swarm workers: grok-4.7-xhigh-fast
+architect runners: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast
+interrogate reviewers: claude-opus-5-5-max, gpt-5.6-sol-max, grok-4.7-xhigh-fast"""
+    safe_shape = """# pstack model configuration. Consumers read this file explicitly.
+# `inherit-parent` or `auto` means: omit the subagent model parameter.
+# budget: medium (host-controlled)
+feature, refactoring: inherit-parent
+bug-fix: inherit-parent
+perf-issue: inherit-parent
+hillclimb: inherit-parent
+judgment and prose: inherit-parent
+hardest tasks: inherit-parent
+how explorer: inherit-parent
+how explainer: inherit-parent
+why investigators: inherit-parent
+why synthesizer: inherit-parent
+reflect tooling: inherit-parent
+reflect judgment, divergent, synthesizer: inherit-parent
+arena runners: inherit-parent
+arena cross-judge pool: inherit-parent
+swarm workers: inherit-parent
+architect runners: inherit-parent
+interrogate reviewers: inherit-parent"""
+    body = body.replace(old_shape, safe_shape)
+    body = body.replace(
+        "Tell the user the rule was written and that it applies to new sessions. Re-running "
+        "this skill updates it.",
+        "Tell the user the shared file was written. Explain that it is not loaded "
+        "automatically by the host: each converted pstack Skill reads it when invoked. Do not "
+        "claim a configured model is active until a consuming Skill successfully launches a "
+        "subagent with that exact identifier. Re-running this Skill updates the file.",
+    )
+    return body
+
+
 def adapt_body(skill: SourceSkill, target: str) -> str:
     if target == "claude-code":
         user_skills = "~/.claude/skills/"
@@ -454,6 +582,7 @@ def adapt_body(skill: SourceSkill, target: str) -> str:
     )
     body = adapt_hookless_workflow(skill.name, body, host)
     body = adapt_pr_review_canvas(skill.name, body)
+    body = adapt_pstack_config(skill.name, body, models_file)
 
     notes = compatibility_notes(skill)
     preface = [
@@ -497,10 +626,16 @@ def short_description(description: str) -> str:
 def write_skill(skill: SourceSkill, target: str, destination: Path) -> None:
     destination.mkdir(parents=True)
     copy_support_files(skill, destination)
+    description = skill.description
+    if skill.name == "setup-pstack":
+        description = description.replace(
+            "writes an always-applied rule that overrides the skill defaults",
+            "writes a shared file that converted pstack Skills read explicitly",
+        )
     frontmatter = [
         "---",
         f"name: {skill.name}",
-        f"description: {yaml_string(skill.description)}",
+        f"description: {yaml_string(description)}",
     ]
     if target == "codex":
         frontmatter.append("license: MIT")

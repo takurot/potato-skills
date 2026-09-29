@@ -8,6 +8,8 @@ disable-model-invocation: true
 > Use the host's equivalent tool or subagent interface when the text names a Cursor-specific control.
 > Never claim that an unavailable hook, MCP server, named agent, or Cursor service ran.
 
+> Model configuration: Read `~/.claude/pstack-models.md` before choosing any model. The host does not load this file automatically. Use only the role lines in that file and only exact model identifiers accepted by the current host. For `auto` or `inherit-parent`, omit the subagent model parameter.
+
 # Interrogate
 
 Spawn one reviewer per configured model to adversarially review code changes. Each model gets the same prompt and rubric. The adversarial signal comes from model diversity, not assigned personas.

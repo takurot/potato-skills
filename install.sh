@@ -10,6 +10,9 @@ SELECTOR_PROVIDED=0
 FORCE=0
 DRY_RUN=0
 LIST_ONLY=0
+TEMP_ROOT=""
+ROLLBACK_DESTINATION=""
+ROLLBACK_BACKUP=""
 
 usage() {
   cat <<'EOF'
@@ -33,6 +36,39 @@ die() {
   printf 'error: %s\n' "$*" >&2
   exit 1
 }
+
+path_exists() {
+  [ -e "$1" ] || [ -L "$1" ]
+}
+
+cleanup_on_exit() {
+  status=$?
+  trap - EXIT
+
+  if [ -n "$ROLLBACK_BACKUP" ] && path_exists "$ROLLBACK_BACKUP"; then
+    if ! path_exists "$ROLLBACK_DESTINATION"; then
+      if mv "$ROLLBACK_BACKUP" "$ROLLBACK_DESTINATION"; then
+        printf 'restored %s after failed update\n' "$ROLLBACK_DESTINATION" >&2
+      else
+        printf 'error: failed to restore %s from %s\n' \
+          "$ROLLBACK_DESTINATION" "$ROLLBACK_BACKUP" >&2
+      fi
+    else
+      printf 'error: preserved backup at %s; destination also exists\n' \
+        "$ROLLBACK_BACKUP" >&2
+    fi
+  fi
+
+  if [ -n "$TEMP_ROOT" ] && [ -d "$TEMP_ROOT" ]; then
+    rm -rf -- "$TEMP_ROOT"
+  fi
+  exit "$status"
+}
+
+trap cleanup_on_exit EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -128,8 +164,7 @@ destination_for() {
 backup_for() {
   platform=$1
   name=$2
-  destination=$3
-  timestamp=$4
+  timestamp=$3
   if [ "$platform" = "codex" ]; then
     if [ "$SCOPE" = "project" ]; then
       printf '%s/.agents/skill-backups/%s.backup.%s\n' "$PROJECT_DIR" "$name" "$timestamp"
@@ -137,8 +172,12 @@ backup_for() {
       printf '%s/skill-backups/%s.backup.%s\n' \
         "${CODEX_HOME:-${HOME:?HOME is required}/.codex}" "$name" "$timestamp"
     fi
+  elif [ "$SCOPE" = "project" ]; then
+    printf '%s/.claude/skill-backups/%s.backup.%s\n' \
+      "$PROJECT_DIR" "$name" "$timestamp"
   else
-    printf '%s.backup.%s\n' "$destination" "$timestamp"
+    printf '%s/skill-backups/%s.backup.%s\n' \
+      "${CLAUDE_CONFIG_DIR:-${HOME:?HOME is required}/.claude}" "$name" "$timestamp"
   fi
 }
 
@@ -163,35 +202,41 @@ install_platform() {
     found=$((found + 1))
     destination="$destination_root/$name"
 
-    if [ -d "$destination" ] && diff -qr "$source_skill" "$destination" >/dev/null 2>&1; then
+    if [ -d "$destination" ] && [ ! -L "$destination" ] && \
+      diff -qr "$source_skill" "$destination" >/dev/null 2>&1; then
       printf 'unchanged %s: %s\n' "$platform" "$name"
       continue
     fi
-    if [ -e "$destination" ] && [ "$FORCE" -eq 0 ]; then
+    if path_exists "$destination" && [ "$FORCE" -eq 0 ]; then
       printf 'skipped   %s: %s (already exists; use --force)\n' "$platform" "$name"
       continue
     fi
     if [ "$DRY_RUN" -eq 1 ]; then
-      if [ -e "$destination" ]; then
-        backup=$(backup_for "$platform" "$name" "$destination" "$timestamp")
+      if path_exists "$destination"; then
+        backup=$(backup_for "$platform" "$name" "$timestamp")
         printf 'would back up %s to %s\n' "$destination" "$backup"
       fi
       printf 'would install %s to %s\n' "$name" "$destination"
       continue
     fi
 
-    temp_root=$(mktemp -d "${TMPDIR:-/tmp}/potato-skills.XXXXXX")
-    staged="$temp_root/$name"
+    TEMP_ROOT=$(mktemp -d "$destination_root/.potato-skills.XXXXXX")
+    staged="$TEMP_ROOT/$name"
     cp -R "$source_skill" "$staged"
-    if [ -e "$destination" ]; then
-      backup=$(backup_for "$platform" "$name" "$destination" "$timestamp")
-      [ ! -e "$backup" ] || die "backup already exists: $backup"
+    if path_exists "$destination"; then
+      backup=$(backup_for "$platform" "$name" "$timestamp")
+      ! path_exists "$backup" || die "backup already exists: $backup"
       mkdir -p "${backup%/*}"
       mv "$destination" "$backup"
+      ROLLBACK_DESTINATION=$destination
+      ROLLBACK_BACKUP=$backup
       printf 'backed up %s to %s\n' "$destination" "$backup"
     fi
     mv "$staged" "$destination"
-    rmdir "$temp_root"
+    ROLLBACK_DESTINATION=""
+    ROLLBACK_BACKUP=""
+    rmdir "$TEMP_ROOT"
+    TEMP_ROOT=""
     printf 'installed %s: %s\n' "$platform" "$name"
   done
 

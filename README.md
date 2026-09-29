@@ -65,7 +65,12 @@ Main options:
 
 By default, an existing Skill with the same name is not overwritten and is reported as `skipped`. Identical installations are reported as `unchanged`.
 
-User-level Codex backups are stored in `~/.codex/skill-backups/`. Project-level Codex backups are stored in `<project>/.agents/skill-backups/`. Both locations are outside Skill discovery directories.
+Backups are kept outside active Skill discovery directories:
+
+- Claude Code: `~/.claude/skill-backups/` for user installs and `<project>/.claude/skill-backups/` for project installs. `CLAUDE_CONFIG_DIR` replaces `~/.claude` when set.
+- Codex: `~/.codex/skill-backups/` for user installs and `<project>/.agents/skill-backups/` for project installs. `CODEX_HOME` replaces `~/.codex` when set.
+
+Forced updates are staged on the destination filesystem. If activation fails after the existing Skill is backed up, the installer restores that original Skill automatically and removes its temporary staging directory.
 
 ## Conversion policy
 

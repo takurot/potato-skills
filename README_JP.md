@@ -65,7 +65,12 @@ Claude Code は `<project>/.claude/skills/`、Codex は `<project>/.agents/skill
 - `--target claude|codex|both` — 対象を選択
 
 既存の同名 Skill は標準では上書きせず、`skipped` と表示します。同一内容なら `unchanged` です。
-Codexのユーザー単位バックアップは `~/.codex/skill-backups/`、プロジェクト単位バックアップは `<project>/.agents/skill-backups/` に保存し、Skill探索対象から分離します。
+バックアップは有効なSkillの探索対象外に保存します。
+
+- Claude Code: ユーザー単位は `~/.claude/skill-backups/`、プロジェクト単位は `<project>/.claude/skill-backups/`。`CLAUDE_CONFIG_DIR` が設定されている場合は `~/.claude` を置き換えます。
+- Codex: ユーザー単位は `~/.codex/skill-backups/`、プロジェクト単位は `<project>/.agents/skill-backups/`。`CODEX_HOME` が設定されている場合は `~/.codex` を置き換えます。
+
+強制更新はインストール先と同じファイルシステムでステージングします。既存Skillのバックアップ後に有効化が失敗した場合、元のSkillを自動で復元し、一時ステージングディレクトリを削除します。
 
 ## 変換方針
 

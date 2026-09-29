@@ -1,6 +1,6 @@
 # potato-skills Development Workflow
 
-**Last updated:** 2026-09-27
+**Last updated:** 2026-09-29
 **Applies to:** `takurot/potato-skills`
 
 This document defines how to update the Cursor source snapshot, convert Skills for
@@ -130,8 +130,13 @@ explicit, documented selection rule rather than first-match behavior.
 Run the canonical regeneration only after the source revision is confirmed:
 
 ```bash
+python3 -m pip install --requirement requirements.txt
 python3 scripts/build_skills.py --source ref/plugins --output skills
+python3 scripts/validate_generated.py skills
 ```
+
+If the checksum policy reports local generated changes, inspect and preserve them.
+Use `--force` only when intentionally replacing that recognized generated tree.
 
 Review the manifest revision, Skill count, additions, removals, and every changed
 license before accepting the generated diff.
@@ -200,6 +205,7 @@ explicitly marked as an opt-in integration check.
 
 ```bash
 python3 -m py_compile scripts/build_skills.py
+python3 scripts/validate_generated.py skills
 shellcheck install.sh
 python3 -m json.tool skills/manifest.json >/dev/null
 claude plugin validate skills/claude-code

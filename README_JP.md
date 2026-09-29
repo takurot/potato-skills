@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-**最終更新:** 2026-09-26
+**最終更新:** 2026-09-29
 
 Cursor 公式プラグイン集 [`cursor/plugins`](https://github.com/cursor/plugins) の Skills を、Claude Code と Codex で読み込める形式に変換した配布リポジトリです。
 
@@ -12,7 +12,7 @@ Cursor 公式プラグイン集 [`cursor/plugins`](https://github.com/cursor/plu
 - `skills/codex/` — Codex 用 Skills（`agents/openai.yaml` を含む）
 - `install.sh` — ユーザー単位またはプロジェクト単位のインストーラ
 - `scripts/build_skills.py` — `ref/plugins` から配布物を再生成する変換スクリプト
-- `skills/manifest.json` — 変換元、バージョン、互換性上の注意を記録したマニフェスト
+- `skills/manifest.json` — 変換元、ライセンス、バージョン、互換性上の注意、生成ファイルchecksumを記録したマニフェスト
 
 変換対象は各 Cursor プラグインの `plugin.json` が `skills` として宣言したものだけです。MCP 設定しか持たないプラグインは Skills ではないため変換しません。重複する2組は、付属ファイルが充実した版または本来のプラグイン側の版に統合しています。
 現在の参照 revision からは、各ホスト向けに91個の Skills を生成します。
@@ -90,7 +90,10 @@ Claude Code と Codex は Skill frontmatter の仕様が異なるため、配布
 | Cursor の専用 agent 定義 | `references/cursor-agents/` に同梱 | `references/cursor-agents/` に同梱 |
 | `.cursor/skills/` への参照 | `.claude/skills/` へ変換 | `.agents/skills/` または `~/.codex/skills/` へ変換 |
 
-名前は小文字 kebab-case に正規化し、壊れた YAML frontmatter も有効な YAML として再出力します。
+名前は小文字 kebab-case に正規化します。frontmatterはPyYAMLで解析し、重複・未知fieldや
+不正な値を拒否して有効なYAMLを出力します。colonを含む未quoteのplain `description` という
+既知のlegacy形式だけは明示的に正規化します。support treeではsymlink、secret、cache、
+dependency directoryを拒否します。MIT宣言と一致する変換元 `LICENSE` が必須です。
 
 ## 互換性の境界
 
@@ -111,10 +114,17 @@ Skill の文章やローカルスクリプトは移植できますが、Cursor �
 
 ```bash
 git clone https://github.com/cursor/plugins.git ref/plugins
+python3 -m pip install --requirement requirements.txt
 python3 scripts/build_skills.py
+python3 scripts/validate_generated.py skills
 ```
 
 `ref/` はこのリポジトリには含めません。すでに `ref/plugins` がある場合は、そのリポジトリを更新してから変換してください。変換スクリプトは `plugin.json` の `skills` 宣言だけを探索し、`skills/` を決定的に再生成します。
+
+manifestとsidecar checksumで生成treeを保護します。通常の再生成は、変更・追加・欠落した
+生成ファイルがあると拒否します。ローカル作業を確認・退避し、認識済み生成treeを意図的に
+置き換える場合だけ `--force` を使用してください。出力の有効化はrollback可能なrenameで行います。
+CIは固定した変換元revisionから両ホスト向け配布物を再生成し、commit済みtreeと比較します。
 
 ## ライセンス
 

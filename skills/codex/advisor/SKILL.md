@@ -14,7 +14,7 @@ license: MIT
 
 You are the main model. Advisor mode adds a second, stronger model that you consult at a few key points. The advisor gets your briefing (and the full transcript when available), thinks hard, and returns a verdict with guidance. It does not edit files. You still do the work and make the final call.
 
-State lives in `.codex/advisor/state.json` at the project root. When that file exists with `"enabled": true`, advisor mode is on for this project.
+State lives in `.codex/advisor/state.json` at the project root. When that file exists with `"enabled": true`, it records manual advisor preferences for the current conversation; it does not install lifecycle hooks.
 
 ## Commands
 
@@ -27,7 +27,7 @@ The text after `/advisor` selects the action.
 | `/advisor off` | Disable: delete `.codex/advisor/`. |
 | `/advisor status` | Report model, consult count, and whether the end-of-turn nudge is on. Changes nothing. |
 | `/advisor ask <question>` | Consult now about the current work, regardless of checkpoint. |
-| `/advisor nudge on` / `off` | Toggle the end-of-turn reminder posted by the plugin's stop hook (default on). |
+| `/advisor nudge on` / `off` | Record a nudge preference only. Automatic end-of-turn nudges are unavailable on this host. |
 
 If the message also contains a task (`/advisor, then refactor the cache layer`), enable first, then do the task under advisor mode.
 
@@ -46,7 +46,7 @@ If the Task tool rejects a slug, read the valid slugs from its error message, pi
 ## Enabling
 
 1. Resolve the model as described above.
-2. Write `.codex/advisor/state.json` with the file-writing tool (not a shell redirect), creating the directory if needed. If a state file already exists, carry over its `model` (unless this command names one) and `nudge`, and reset every other field to the values below. You cannot see which conversation an existing file belongs to, so always rewrite it: that re-binds the mode to this conversation, the hooks re-fill `conversation_id` and `transcript_path`, and the next consult starts a fresh advisor instead of resuming another chat's. Also delete `.codex/advisor/pending` and `.codex/advisor/last-response.txt` if they exist, so a marker left by another conversation cannot trigger the end-of-turn nudge here. Keep `log.md`.
+2. Write `.codex/advisor/state.json` with the file-writing tool (not a shell redirect), creating the directory if needed. If a state file already exists, carry over its `model` (unless this command names one) and `nudge`, and reset every other field to the values below. You cannot see which conversation an existing file belongs to, so always rewrite it: that re-binds the manual preferences to this conversation. Leave `conversation_id` and `transcript_path` null unless the active host explicitly provides safe current-conversation values. The next consult starts a fresh advisor instead of resuming another chat's. Also delete `.codex/advisor/pending` and `.codex/advisor/last-response.txt` if they exist, so a marker left by another conversation cannot trigger the end-of-turn nudge here. Keep `log.md`.
 
    ```json
    {
@@ -62,8 +62,8 @@ If the Task tool rejects a slug, read the valid slugs from its error message, pi
    }
    ```
 
-   The plugin's hooks fill in `conversation_id`, `transcript_path`, `consults`, and `last_consult_at`. Leave them alone.
-3. Confirm in one line: `Advisor on: <slug>. I'll consult it before major decisions, when I'm stuck, and before I call the task done.` Then continue with any task in the same message.
+   Automatic checkpoint and end-of-turn nudge hooks are unavailable. Keep `conversation_id` and `transcript_path` null unless the active host exposes them for this conversation. Update `consults` and `last_consult_at` manually only after a successful consult.
+3. Confirm in one line: `Advisor preferences saved: <slug>. Automatic checkpoints and nudges are unavailable; I will consult only when explicitly invoked in this conversation.` Then continue with any task in the same message.
 
 Never stage or commit `.codex/advisor/`.
 
@@ -104,11 +104,11 @@ Do not consult for routine steps, for things you can verify yourself (run the te
    - `stop`: do not continue with the plan. Rethink, or bring the disagreement to the user if it is a product or scope question.
    - If the advisor asks for something it needs, provide it via `resume`, once. Do not ping-pong.
    - You are accountable for the result. The advisor is a strong second opinion, not an authority. If it is wrong about the codebase, show it the evidence once, or overrule it and tell the user why.
-5. Report each consult to the user in one or two lines: `Advisor (<model>): <verdict>. <One-line summary>. <What you did about it.>` Keep the advisor's full response out of the chat unless the user asks; the hooks also append it to `.codex/advisor/log.md`.
+5. Report each consult to the user in one or two lines: `Advisor (<model>): <verdict>. <One-line summary>. <What you did about it.>` Keep the advisor's full response out of the chat unless the user asks. If a log is required, append it explicitly and report that write; no hook records it at `.codex/advisor/log.md`.
 
 ## End-of-turn nudge
 
-When files changed since the last consult and a turn ends without one, the plugin's `stop` hook posts a follow-up that starts with `[Advisor]`. Treat it as the "before declaring done" checkpoint: run the pre-completion consult, or answer in one line that the change was trivial, or that you are waiting on the user, and stop. It fires at most once per batch of edits. `/advisor nudge off` disables it.
+Automatic checkpoint and end-of-turn nudge hooks are unavailable on this host. Do not promise or wait for a follow-up message. The user must invoke `/advisor ask ...` explicitly for each consult. The `nudge` field is only a saved preference for a future verified host integration.
 
 ## Disabling
 

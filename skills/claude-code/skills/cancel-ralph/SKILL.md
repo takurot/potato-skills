@@ -12,13 +12,13 @@ description: "Cancel an active Ralph Loop. Use when the user wants to stop, canc
 
 ## Trigger
 
-The user wants to cancel or stop an active Ralph loop.
+The user wants to cancel or stop saved manual Ralph state.
 
 ## Workflow
 
 1. Check if `.claude/ralph/scratchpad.md` exists.
 
-2. **If it does not exist**: Tell the user "No active Ralph loop found."
+2. **If it does not exist**: Tell the user "No saved manual Ralph state found."
 
 3. **If it exists**:
    - Read `.claude/ralph/scratchpad.md` to get the current iteration from the `iteration:` field.
@@ -26,8 +26,8 @@ The user wants to cancel or stop an active Ralph loop.
      ```bash
      rm -rf .claude/ralph
      ```
-   - Report: "Cancelled Ralph loop (was at iteration N)."
+   - Report: "Removed saved manual Ralph state (was at iteration N)."
 
 ## Output
 
-A short confirmation with the iteration count, or a message that no loop was active.
+A short confirmation with the iteration count, or a message that no manual state was present.

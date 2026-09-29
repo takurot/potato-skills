@@ -22,13 +22,7 @@ Ralph Loop implements the Ralph Wiggum technique — an iterative development me
 
 Core concept: the same prompt is fed to the agent repeatedly. The "self-referential" aspect comes from the agent seeing its own previous work in the files and git history, not from feeding output back as input.
 
-Each iteration:
-1. The agent receives the SAME prompt
-2. Works on the task, modifying files
-3. Tries to exit
-4. Stop hook intercepts and feeds the same prompt again
-5. The agent sees its previous work in the files
-6. Iteratively improves until completion
+In the original Cursor plugin, a stop hook repeats the prompt. On this host, each later iteration requires the user to invoke the Skill again or a separately verified host continuation mechanism. The saved state lets the agent read its previous work and continue without claiming that a hook is active.
 
 ### Starting a Ralph Loop
 
@@ -44,10 +38,9 @@ Options:
 
 How it works:
 1. Creates `.claude/ralph/scratchpad.md` state file
-2. Agent works on the task
-3. Stop hook intercepts exit and feeds the same prompt back
-4. Agent sees its previous work and iterates
-5. Continues until promise detected or max iterations reached
+2. Agent performs one manual iteration
+3. A later invocation reads the saved prompt and increments the iteration
+4. The agent stops at the configured maximum or when the completion promise is genuinely satisfied
 
 ### Cancelling a Ralph Loop
 
@@ -61,7 +54,7 @@ To signal completion, the agent outputs a `<promise>` tag:
 <promise>TASK COMPLETE</promise>
 ```
 
-The stop hook looks for this specific tag. Without it (or `--max-iterations`), Ralph runs indefinitely.
+On this host, the agent checks this tag during a manual iteration. No background or indefinite loop is created by the state file.
 
 ### When to Use Ralph
 
